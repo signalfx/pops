@@ -1,0 +1,19 @@
+{
+  "ignoreDir": ["Godeps", "thrift", "proto"],
+  "checks": [
+    {
+      "macro": "gofmt"
+    }, {
+      "macro": "vet"
+    }, {
+      "macro": "golint"
+    }, {
+      "macro": "gocyclo"
+    }, {
+      "macro": "gocoverdir",
+      "check": {
+        "args": ["-race", "-covermode", "atomic", "-timeout", "15s", "-cpu", "4", "-requiredcoverage", "0"]
+      }
+    }
+  ]
+}
