@@ -8,6 +8,7 @@ with-container: # run a go distributed docker container and build for the target
 in-container:
 	make setup-build-tools
 	make gobuild
+	make race
 	make binary
 
 setup-build-tools:
@@ -17,6 +18,9 @@ setup-build-tools:
 
 gobuild:
 	gobuild --verbose check
+
+race:
+	go test -race ./...
 
 binary: # create an output directory and build the binaries for the desired version
 	mkdir -p $(CURDIR)/output/$(GOOS)
