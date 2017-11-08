@@ -504,7 +504,7 @@ func (m *Server) setupSfxClient() error {
 	m.sfxclient.Timer = m.timeKeeper
 	m.sfxclient.Sink = clientcfg.WatchSinkChanges(m.sfxclient.Sink, &m.configs.clientConfig.clientConfig, m.logger)
 	m.sfxclient.DefaultDimensions(m.getDefaultDims(&m.configs.clientConfig.clientConfig))
-
+	m.versionMetric.RepoURL = "https://github.com/signalfx/pops"
 	m.versionMetric.FileName = "/buildInfo.json"
 	m.sfxclient.AddCallback(&m.versionMetric)
 

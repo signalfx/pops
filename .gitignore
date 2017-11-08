@@ -16,4 +16,4 @@
 # output of makefile
 output
 
-cmd/pops
+cmd/pops/pops
