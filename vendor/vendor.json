@@ -1,0 +1,287 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "mrz/kicZiUaHxkyfvC/DyQcr8Do=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "ecdeabc65495df2dec95d7c4a4c3e021903035e5",
+			"revisionTime": "2017-10-02T20:02:53Z"
+		},
+		{
+			"checksumSHA1": "yqF125xVSkmfLpIVGrLlfE05IUk=",
+			"path": "github.com/golang/protobuf/proto",
+			"revision": "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9",
+			"revisionTime": "2017-10-21T04:39:52Z"
+		},
+		{
+			"checksumSHA1": "yIkYzW7bzAD81zHyuCNmEj4+oxQ=",
+			"path": "github.com/gopherjs/gopherjs/js",
+			"revision": "444abdf920945de5d4a977b572bcc6c674d1e4eb",
+			"revisionTime": "2017-11-02T03:40:23Z"
+		},
+		{
+			"checksumSHA1": "g/V4qrXjUGG9B+e3hB+4NAYJ5Gs=",
+			"path": "github.com/gorilla/context",
+			"revision": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42",
+			"revisionTime": "2016-08-17T18:46:32Z"
+		},
+		{
+			"checksumSHA1": "hUTpkQKTPpTUll9JmFj9NyQ+wjs=",
+			"path": "github.com/gorilla/mux",
+			"revision": "7f08801859139f86dfafd1c296e2cba9a80d292e",
+			"revisionTime": "2017-11-05T17:23:20Z"
+		},
+		{
+			"checksumSHA1": "Js/yx9fZ3+wH1wZpHNIxSTMIaCg=",
+			"path": "github.com/jtolds/gls",
+			"revision": "77f18212c9c7edc9bd6a33d383a7b545ce62f064",
+			"revisionTime": "2017-05-03T22:40:06Z"
+		},
+		{
+			"checksumSHA1": "abKzFXAn0KDr5U+JON1ZgJ2lUtU=",
+			"path": "github.com/kr/logfmt",
+			"revision": "b84e30acd515aadc4b783ad4ff83aff3299bdfe0",
+			"revisionTime": "2014-02-26T03:06:59Z"
+		},
+		{
+			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
+			"path": "github.com/pmezard/go-difflib/difflib",
+			"revision": "792786c7400a136282c1664665ae0a8db921c6c2",
+			"revisionTime": "2016-01-10T10:55:54Z"
+		},
+		{
+			"checksumSHA1": "U4ypvRxOj4YYX1YlHyeCPaFq5Xg=",
+			"path": "github.com/samuel/go-zookeeper/zk",
+			"revision": "9a96098268ef555eb1f04d8b1ee813d0a87e5089",
+			"revisionTime": "2017-10-27T00:15:00Z"
+		},
+		{
+			"checksumSHA1": "NPSMkTpiU07vVOSFhHm6vD1GWj8=",
+			"path": "github.com/signalfx/com_signalfx_metrics_protobuf",
+			"revision": "93e507b42f43f458a109ca278d1542a26a0b87fc",
+			"revisionTime": "2017-03-30T20:24:26Z"
+		},
+		{
+			"checksumSHA1": "47eomoBADlzqcm9/+l+obP+VYd4=",
+			"path": "github.com/signalfx/gohistogram",
+			"revision": "1ccfd2ff508314074672f4450a917011a2060408",
+			"revisionTime": "2016-01-07T21:00:54Z"
+		},
+		{
+			"checksumSHA1": "Ryb+5u+9zlcIyVDQ/GS5gx0hV/Y=",
+			"path": "github.com/signalfx/golib/clientcfg",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "v7hz8W9CHtmSRfvSCFeXX3hzh5U=",
+			"path": "github.com/signalfx/golib/datapoint",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "ybH7OITlwRJLsrewUO448NEzVQs=",
+			"path": "github.com/signalfx/golib/datapoint/dpsink",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "VEgOZCXnmQ8OxLK3S3f4sxspVWo=",
+			"path": "github.com/signalfx/golib/distconf",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "GuSggAzlI13Uu1yZ9rM8puMTEi8=",
+			"path": "github.com/signalfx/golib/errors",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "wDOXoGg2ALYhvV4GVZEeMqXP7SE=",
+			"path": "github.com/signalfx/golib/event",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "TVb+/MOLmMBr4ZJ2qLQUbsyL5is=",
+			"path": "github.com/signalfx/golib/eventcounter",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "OFrPOY5sCUCxCJwS9EDWACTNksQ=",
+			"path": "github.com/signalfx/golib/explorable",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "29gulXpUnRTaBcQorpXbELFZoRM=",
+			"path": "github.com/signalfx/golib/expvar2",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "eekSTeSfgjaUfoYorQcRonUBN/0=",
+			"path": "github.com/signalfx/golib/log",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "Jww4G7329IP9YYR4AW7RBurVTdw=",
+			"path": "github.com/signalfx/golib/logkey",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "e437Xftv3lq51VGANp9KcH7cD8U=",
+			"path": "github.com/signalfx/golib/pointer",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "N+OiKDJ+L5TSeYLgbIOfeKDaTo4=",
+			"path": "github.com/signalfx/golib/reportsha",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "ol1mXg246odRfid1R58qRpgepMw=",
+			"path": "github.com/signalfx/golib/sfxclient",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "kLiclgZJImywtHf9fXdY7D0PsvY=",
+			"path": "github.com/signalfx/golib/timekeeper",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "LGiqYL4IfW+l/4h1A08VkfFM/AY=",
+			"path": "github.com/signalfx/golib/timekeeper/timekeepertest",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "UA65Vf/M7UnAJsJpRHT+8kX1CB0=",
+			"path": "github.com/signalfx/golib/web",
+			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
+			"revisionTime": "2017-11-08T15:07:20Z"
+		},
+		{
+			"checksumSHA1": "g4swDPh9R9XJuddP2YuWEujKRT8=",
+			"path": "github.com/signalfx/metricproxy/logkey",
+			"revision": "09c0505c07a25ff50fe3269270536de9b4e4dff3",
+			"revisionTime": "2017-06-07T18:39:48Z"
+		},
+		{
+			"checksumSHA1": "CoMaypk0Zl/QFFVhXy7Zn6QLOCY=",
+			"path": "github.com/signalfx/metricproxy/protocol",
+			"revision": "09c0505c07a25ff50fe3269270536de9b4e4dff3",
+			"revisionTime": "2017-06-07T18:39:48Z"
+		},
+		{
+			"checksumSHA1": "6ZhjwN9+GqSKrMXwPMnexPAKqFw=",
+			"path": "github.com/signalfx/metricproxy/protocol/collectd",
+			"revision": "09c0505c07a25ff50fe3269270536de9b4e4dff3",
+			"revisionTime": "2017-06-07T18:39:48Z"
+		},
+		{
+			"checksumSHA1": "sShUKLc4Fd2G445WFE5Bhpas96k=",
+			"path": "github.com/signalfx/metricproxy/protocol/filtering",
+			"revision": "09c0505c07a25ff50fe3269270536de9b4e4dff3",
+			"revisionTime": "2017-06-07T18:39:48Z"
+		},
+		{
+			"checksumSHA1": "yp1hHaiUzVWGIFvGj6AmjYvfKsk=",
+			"path": "github.com/signalfx/metricproxy/protocol/signalfx",
+			"revision": "09c0505c07a25ff50fe3269270536de9b4e4dff3",
+			"revisionTime": "2017-06-07T18:39:48Z"
+		},
+		{
+			"path": "github.com/signalfx/smartystreets/goconvey/convey",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "ozRFnFdTG0IjkTE0RkZn71XO4gw=",
+			"path": "github.com/smartystreets/assertions",
+			"revision": "0b37b35ec7434b77e77a4bb29b79677cced992ea",
+			"revisionTime": "2017-09-25T17:21:51Z"
+		},
+		{
+			"checksumSHA1": "Vzb+dEH/LTYbvr8RXHmt6xJHz04=",
+			"path": "github.com/smartystreets/assertions/internal/go-render/render",
+			"revision": "0b37b35ec7434b77e77a4bb29b79677cced992ea",
+			"revisionTime": "2017-09-25T17:21:51Z"
+		},
+		{
+			"checksumSHA1": "r6FauVdOTFnwYQgrKGFuWUbIAJE=",
+			"path": "github.com/smartystreets/assertions/internal/oglematchers",
+			"revision": "0b37b35ec7434b77e77a4bb29b79677cced992ea",
+			"revisionTime": "2017-09-25T17:21:51Z"
+		},
+		{
+			"checksumSHA1": "f4m09DHEetaanti/GqUJzyCBTaI=",
+			"path": "github.com/smartystreets/goconvey/convey",
+			"revision": "e5b2b7c9111590d019a696c7800593f666e1a7f4",
+			"revisionTime": "2017-08-25T22:14:26Z"
+		},
+		{
+			"checksumSHA1": "9LakndErFi5uCXtY1KWl0iRnT4c=",
+			"path": "github.com/smartystreets/goconvey/convey/gotest",
+			"revision": "e5b2b7c9111590d019a696c7800593f666e1a7f4",
+			"revisionTime": "2017-08-25T22:14:26Z"
+		},
+		{
+			"checksumSHA1": "FWDhk37bhAwZ2363D/L2xePwR64=",
+			"path": "github.com/smartystreets/goconvey/convey/reporting",
+			"revision": "e5b2b7c9111590d019a696c7800593f666e1a7f4",
+			"revisionTime": "2017-08-25T22:14:26Z"
+		},
+		{
+			"checksumSHA1": "mGbTYZ8dHVTiPTTJu3ktp+84pPI=",
+			"path": "github.com/stretchr/testify/assert",
+			"revision": "2aa2c176b9dab406a6970f6a55f513e8a8c8b18f",
+			"revisionTime": "2017-08-14T20:04:35Z"
+		},
+		{
+			"checksumSHA1": "7vs6dSc1PPGBKyzb/SCIyeMJPLQ=",
+			"path": "github.com/stretchr/testify/require",
+			"revision": "2aa2c176b9dab406a6970f6a55f513e8a8c8b18f",
+			"revisionTime": "2017-08-14T20:04:35Z"
+		},
+		{
+			"checksumSHA1": "sFD8LpJPQtWLwGda3edjf5mNUbs=",
+			"path": "github.com/vaughan0/go-ini",
+			"revision": "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1",
+			"revisionTime": "2013-09-23T14:52:12Z"
+		},
+		{
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
+			"path": "golang.org/x/net/context",
+			"revision": "a337091b0525af65de94df2eb7e98bd9962dcbe2",
+			"revisionTime": "2016-10-09T20:39:03Z"
+		},
+		{
+			"checksumSHA1": "dEq3EOUlisOe0lOB3P8A3oU5PEM=",
+			"path": "gopkg.in/logfmt.v0",
+			"revision": "390ab7935ee28ec6b286364bba9b4dd6410cb3d5",
+			"revisionTime": "2016-11-15T14:25:13Z"
+		},
+		{
+			"checksumSHA1": "TM3Neoy1xRAKyZYMGzKc41sDFW4=",
+			"path": "gopkg.in/natefinch/lumberjack.v2",
+			"revision": "a96e63847dc3c67d17befa69c303767e2f84e54f",
+			"revisionTime": "2017-05-31T16:03:50Z"
+		},
+		{
+			"checksumSHA1": "55lMHP6kCJOgGbb0hmPF0W2T9P0=",
+			"path": "gopkg.in/stack.v1",
+			"revision": "817915b46b97fd7bb80e8ab6b69f01a53ac3eebf",
+			"revisionTime": "2017-07-24T01:23:01Z"
+		}
+	],
+	"rootPath": "github.com/signalfx/pops"
+}
