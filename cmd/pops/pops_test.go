@@ -57,7 +57,7 @@ func TestGetDefaultDims(t *testing.T) {
 		c.clientConfig.OsHostname = func() (string, error) {
 			return "hello", nil
 		}
-		So(s.getDefaultDims(&c.clientConfig), ShouldResemble, map[string]string{"sf_source": "hello"})
+		So(s.getDefaultDims(&c.clientConfig), ShouldResemble, map[string]string{"sf_source": "hello", "host_name": "hello"})
 		c.clientConfig.OsHostname = func() (string, error) {
 			return "", errors.New("nope")
 		}
