@@ -324,6 +324,9 @@ func (m *Server) getDefaultDims(conf *clientcfg.ClientConfig) map[string]string 
 		m.logger.Log(log.Err, err, "cannot fetch default dimensions")
 		defaultDims = map[string]string{"sf_source": "unknown"}
 	}
+	if hostname, err := conf.OsHostname(); err == nil {
+		defaultDims["host_name"] = hostname
+	}
 	return defaultDims
 }
 

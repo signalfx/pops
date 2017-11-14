@@ -26,5 +26,8 @@ binary: # create an output directory and build the binaries for the desired vers
 	mkdir -p $(CURDIR)/output/$(GOOS)
 	CGO_ENABLED=0 go build -v -o $(CURDIR)/output/$(GOOS)/pops $(CURDIR)/cmd/pops/pops.go
 
-container: with-container # build container for pops service
+buildInfo:
+	sh buildInfo.sh
+
+container: buildInfo with-container # build container for pops service
 	docker build -f $(CURDIR)/Dockerfile -t quay.io/signalfx/pops .
