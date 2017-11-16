@@ -53,6 +53,9 @@ func TestGetDefaultDims(t *testing.T) {
 		sfxc := clientcfg.ClientConfig{}
 		sfxc.Load(s.conf)
 		c := &clientConfig{sfxc}
+		m := popsConfig{}
+		m.Load(s.conf)
+		s.configs.mainConfig = m
 		// c.clientConfig.SourceName = d.Str("SOURCE", "") // hostname isn't used if there's a default value for SourceName
 		c.clientConfig.OsHostname = func() (string, error) {
 			return "hello", nil
@@ -187,6 +190,36 @@ func (d *doubleCheckCloseContext) Done() <-chan struct{} {
 		return s
 	}
 	return d.Context.Done()
+}
+
+func TestECSMetadata(t *testing.T) {
+	Convey("", t, func() {
+		m := NewServer()
+		meta := &ecsMetadata{
+			Cluster:              "testCluster",
+			ContainerInstanceARN: "testCARN",
+			ContainerID:          "testCID",
+			ContainerName:        "testCName",
+			TaskARN:              "testARN",
+			DockerContainerName:  "testDCName",
+			ImageID:              "testIID",
+			ImageName:            "testIName",
+		}
+		dims := map[string]string{}
+		expected := map[string]string{
+			"cluster":                "testCluster",
+			"container_instance_arn": "testCARN",
+			"container_id":           "testCID",
+			"container_name":         "testCName",
+			"task_arn":               "testARN",
+			"docker_container_name":  "testDCName",
+			"image_id":               "testIID",
+			"image_name":             "testIName",
+		}
+		m.addECSDims(meta, dims)
+		So(dims, ShouldResemble, expected)
+
+	})
 }
 
 func TestScheduledService(t *testing.T) {

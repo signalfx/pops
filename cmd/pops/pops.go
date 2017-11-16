@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"expvar"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -48,6 +51,17 @@ type stats struct {
 	TotalHealthChecks      int64
 }
 
+type ecsMetadata struct {
+	Cluster              string
+	ContainerInstanceARN string
+	TaskARN              string
+	ContainerID          string
+	ContainerName        string
+	DockerContainerName  string
+	ImageID              string
+	ImageName            string
+}
+
 type popsConfig struct {
 	minimalGracefulWaitTime *distconf.Duration
 	maxGracefulWaitTime     *distconf.Duration
@@ -55,6 +69,7 @@ type popsConfig struct {
 	silentGracefulTime      *distconf.Duration
 	machineID               *distconf.Str
 	ingestPort              *distconf.Int
+	ecsMetadataPath         *distconf.Str
 }
 
 // Load the client config values from distconf
@@ -65,6 +80,7 @@ func (c *popsConfig) Load(conf *distconf.Distconf) {
 	c.silentGracefulTime = conf.Duration("POPS_GRACEFUL_SILENT_TIME", time.Second*3)
 	c.machineID = conf.Str("SF_SOURCE_NAME", "")
 	c.ingestPort = conf.Int("POPS_PORT", 8100)
+	c.ecsMetadataPath = conf.Str("ECS_CONTAINER_METADATA_FILE", "")
 }
 
 type dataSinkConfig struct {
@@ -318,6 +334,50 @@ func (m *Server) PutTokenOnContext(ctx context.Context, rw http.ResponseWriter, 
 	}
 }
 
+func (m *Server) getECSMetadata() *ecsMetadata {
+	var raw []byte
+	var err error
+	meta := &ecsMetadata{}
+	m.logger.Log(m.configs.mainConfig.ecsMetadataPath.Get())
+	if raw, err = ioutil.ReadFile(m.configs.mainConfig.ecsMetadataPath.Get()); err != nil {
+		m.logger.Log(err)
+	}
+	raw = bytes.Replace(raw, []byte("\n"), []byte(""), -1)
+	raw = bytes.Replace(raw, []byte("\t"), []byte(""), -1)
+	if err = json.Unmarshal(raw, meta); err != nil {
+		m.logger.Log(err)
+	}
+	m.logger.Log(meta)
+	return meta
+}
+
+func (m *Server) addECSDims(metadata *ecsMetadata, dims map[string]string) {
+	if metadata.Cluster != "" {
+		dims["cluster"] = metadata.Cluster
+	}
+	if metadata.ContainerInstanceARN != "" {
+		dims["container_instance_arn"] = metadata.ContainerInstanceARN
+	}
+	if metadata.ContainerID != "" {
+		dims["container_id"] = metadata.ContainerID
+	}
+	if metadata.ContainerName != "" {
+		dims["container_name"] = metadata.ContainerName
+	}
+	if metadata.DockerContainerName != "" {
+		dims["docker_container_name"] = metadata.DockerContainerName
+	}
+	if metadata.ImageID != "" {
+		dims["image_id"] = metadata.ImageID
+	}
+	if metadata.ImageName != "" {
+		dims["image_name"] = metadata.ImageName
+	}
+	if metadata.TaskARN != "" {
+		dims["task_arn"] = metadata.TaskARN
+	}
+}
+
 func (m *Server) getDefaultDims(conf *clientcfg.ClientConfig) map[string]string {
 	defaultDims, err := clientcfg.DefaultDimensions(conf)
 	if err != nil {
@@ -327,6 +387,7 @@ func (m *Server) getDefaultDims(conf *clientcfg.ClientConfig) map[string]string 
 	if hostname, err := conf.OsHostname(); err == nil {
 		defaultDims["host_name"] = hostname
 	}
+	m.addECSDims(m.getECSMetadata(), defaultDims)
 	return defaultDims
 }
 
