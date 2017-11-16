@@ -30,4 +30,4 @@ buildInfo:
 	sh buildInfo.sh
 
 container: buildInfo with-container # build container for pops service
-	docker build -f $(CURDIR)/Dockerfile -t quay.io/signalfx/pops .
+	docker build --no-cache -f $(CURDIR)/Dockerfile -t quay.io/signalfx/pops .
