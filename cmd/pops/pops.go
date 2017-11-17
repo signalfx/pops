@@ -228,8 +228,6 @@ type Server struct {
 	setupDone          chan struct{}
 	SetupRetryDelay    time.Duration
 	standardHeaders    web.HeadersInRequest
-	flagInRemote       web.CtxWithFlag
-	ctxLog             log.CtxDimensions
 	debugServer        *debugServer.DebugServer
 	httpListener       net.Listener
 	timeKeeper         timekeeper.TimeKeeper
@@ -308,7 +306,6 @@ func (m *Server) setupDatapointEndpoint(r *mux.Router, reader signalfx.ErrorRead
 	middleLayers := []web.Constructor{
 		web.NextConstructor(m.PutTokenOnContext),
 		&m.standardHeaders,
-		&m.flagInRemote,
 		web.NextConstructor(m.closeHeader.OptionallyAddCloseHeader),
 		web.NextConstructor(web.AddRequestTime),
 		web.NextHTTP(m.stats.RequestCounter.ServeHTTP),
@@ -435,7 +432,6 @@ func (m *Server) setupDataSink() (err error) {
 func (m *Server) setupHTTPServer() error {
 	m.logger.Log("Setting up http server")
 	sbPort := m.configs.mainConfig.ingestPort.Get()
-	m.flagInRemote.CtxFlagger = &m.ctxLog
 	m.standardHeaders.Headers = map[string]string{}
 	listenAddr := fmt.Sprintf(":%d", sbPort)
 
