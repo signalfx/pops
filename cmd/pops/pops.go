@@ -432,7 +432,6 @@ func (m *Server) setupDataSink() (err error) {
 func (m *Server) setupHTTPServer() error {
 	m.logger.Log("Setting up http server")
 	sbPort := m.configs.mainConfig.ingestPort.Get()
-	//m.flagInRemote.CtxFlagger = &m.ctxLog
 	m.standardHeaders.Headers = map[string]string{}
 	listenAddr := fmt.Sprintf(":%d", sbPort)
 
