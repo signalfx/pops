@@ -147,10 +147,10 @@
 			"revisionTime": "2017-11-08T15:07:20Z"
 		},
 		{
-			"checksumSHA1": "VNpH+Gn7Gmnllupa0Z1Zk5fscUk=",
+			"checksumSHA1": "7vK8b32t0VSs56hk9+j1jAoslpQ=",
 			"path": "github.com/signalfx/golib/sfxclient",
-			"revision": "9f7d8b0aa03d163ffa84017cc82ca451e1935e29",
-			"revisionTime": "2017-11-09T18:04:28Z"
+			"revision": "f4ccea5e54df24df4557ee79d5a756599c1e2824",
+			"revisionTime": "2017-11-20T20:22:55Z"
 		},
 		{
 			"checksumSHA1": "kLiclgZJImywtHf9fXdY7D0PsvY=",
