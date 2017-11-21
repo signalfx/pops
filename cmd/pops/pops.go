@@ -84,12 +84,13 @@ func (c *popsConfig) Load(conf *distconf.Distconf) {
 }
 
 type dataSinkConfig struct {
-	DatapointEndpoint *distconf.Str
-	EventEndpoint     *distconf.Str
-	ShutdownTimeout   *distconf.Duration
-	NumWorkers        *distconf.Int
-	BufferSize        *distconf.Int
-	BatchSize         *distconf.Int
+	DatapointEndpoint  *distconf.Str
+	EventEndpoint      *distconf.Str
+	ShutdownTimeout    *distconf.Duration
+	NumDrainingThreads *distconf.Int
+	NumChannels        *distconf.Int
+	BufferSize         *distconf.Int
+	BatchSize          *distconf.Int
 }
 
 // Load the dataSink config values from distconf
@@ -97,7 +98,8 @@ func (c *dataSinkConfig) Load(conf *distconf.Distconf) {
 	c.DatapointEndpoint = conf.Str("DATA_SINK_DP_ENDPOINT", sfxclient.IngestEndpointV2)
 	c.EventEndpoint = conf.Str("DATA_SINK_EVENT_ENDPOINT", sfxclient.EventIngestEndpointV2)
 	c.ShutdownTimeout = conf.Duration("DATA_SINK_SHUTDOWN_TIMEOUT", 3*time.Second)
-	c.NumWorkers = conf.Int("NUM_DRAINING_THREADS", 50)
+	c.NumChannels = conf.Int("NUM_CHANNELS", 50)
+	c.NumDrainingThreads = conf.Int("NUM_DRAINING_THREADS", 2)
 	c.BufferSize = conf.Int("CHANEL_SIZE", 1000000)
 	c.BatchSize = conf.Int("MAX_DRAIN_SIZE", 5000)
 }
@@ -404,8 +406,10 @@ func (m *Server) setupHealthCheck(r *mux.Router) {
 
 // setupDataSink sets up the sink for Pops with a DatapointEndpoint and EventEndpoint
 func (m *Server) setupDataSink() (err error) {
-	numWorkers := m.configs.dataSinkConfig.NumWorkers.Get()
-	m.logger.Log(fmt.Sprintf("dataSink configured with %d workers", numWorkers))
+	numChannels := m.configs.dataSinkConfig.NumChannels.Get()
+	m.logger.Log(fmt.Sprintf("dataSink configured with %d channels", numChannels))
+	numDrainingThreads := m.configs.dataSinkConfig.NumDrainingThreads.Get()
+	m.logger.Log(fmt.Sprintf("dataSink configured with %d draining threads per channel", numDrainingThreads))
 	bufferSize := int(m.configs.dataSinkConfig.BufferSize.Get())
 	m.logger.Log(fmt.Sprintf("dataSink configured with %d bufferSize", bufferSize))
 	batchSize := int(m.configs.dataSinkConfig.BatchSize.Get())
@@ -416,7 +420,8 @@ func (m *Server) setupDataSink() (err error) {
 	m.logger.Log(fmt.Sprintf("dataSink event endpoint configured with: %s", eventEndpoint))
 	// Setup the sink
 	m.dataSink = sfxclient.NewAsyncMultiTokenSink(
-		numWorkers,
+		numChannels,
+		numDrainingThreads,
 		bufferSize,
 		batchSize,
 		datapointEndpoint,
