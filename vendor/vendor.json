@@ -71,8 +71,8 @@
 		{
 			"checksumSHA1": "Ryb+5u+9zlcIyVDQ/GS5gx0hV/Y=",
 			"path": "github.com/signalfx/golib/clientcfg",
-			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
-			"revisionTime": "2017-11-08T15:07:20Z"
+			"revision": "8d1ff0fc293d3d7379e19ab344b7c1d25b887ae7",
+			"revisionTime": "2017-11-29T19:39:12Z"
 		},
 		{
 			"checksumSHA1": "v7hz8W9CHtmSRfvSCFeXX3hzh5U=",
@@ -143,14 +143,14 @@
 		{
 			"checksumSHA1": "N+OiKDJ+L5TSeYLgbIOfeKDaTo4=",
 			"path": "github.com/signalfx/golib/reportsha",
-			"revision": "57c3839ef6a5a1170ba136b43e01507b28c13b0a",
-			"revisionTime": "2017-11-08T15:07:20Z"
+			"revision": "8d1ff0fc293d3d7379e19ab344b7c1d25b887ae7",
+			"revisionTime": "2017-11-29T19:39:12Z"
 		},
 		{
-			"checksumSHA1": "qbZ+T99bdKVUQIj1oVjn8UPaMIw=",
+			"checksumSHA1": "/PHSHzsDe+k4t7NeMBRUiinxJ+k=",
 			"path": "github.com/signalfx/golib/sfxclient",
-			"revision": "c68fa28ecf37648f6eedea8fe9a3510af1e3893f",
-			"revisionTime": "2017-11-21T17:58:31Z"
+			"revision": "8d1ff0fc293d3d7379e19ab344b7c1d25b887ae7",
+			"revisionTime": "2017-11-29T19:39:12Z"
 		},
 		{
 			"checksumSHA1": "kLiclgZJImywtHf9fXdY7D0PsvY=",
