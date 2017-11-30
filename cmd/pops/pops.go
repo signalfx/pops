@@ -91,6 +91,7 @@ type dataSinkConfig struct {
 	NumChannels        *distconf.Int
 	BufferSize         *distconf.Int
 	BatchSize          *distconf.Int
+	MaxRetry           *distconf.Int
 }
 
 // Load the dataSink config values from distconf
@@ -102,6 +103,7 @@ func (c *dataSinkConfig) Load(conf *distconf.Distconf) {
 	c.NumDrainingThreads = conf.Int("NUM_DRAINING_THREADS", 2)
 	c.BufferSize = conf.Int("CHANEL_SIZE", 1000000)
 	c.BatchSize = conf.Int("MAX_DRAIN_SIZE", 5000)
+	c.MaxRetry = conf.Int("MAX_RETRY", 1)
 }
 
 // clientConfig is a wrapper for clientcfg.ClientConfig.  It has an alternate Load function
@@ -244,6 +246,11 @@ type Server struct {
 	osStat             func(string) (os.FileInfo, error)
 	closeHeader        web.CloseHeader
 	SetupRetryAttempts int32
+}
+
+func (m *Server) defaultDataSinkErrorHandler(err error) error {
+	m.logger.Log(log.Err, err, "Error in dataSink")
+	return nil
 }
 
 func (m *Server) defaultClientErrorHandler(err error) error {
@@ -418,6 +425,8 @@ func (m *Server) setupDataSink() (err error) {
 	m.logger.Log(fmt.Sprintf("dataSink datapoint endpoint configured with: %s", datapointEndpoint))
 	eventEndpoint := m.configs.dataSinkConfig.EventEndpoint.Get()
 	m.logger.Log(fmt.Sprintf("dataSink event endpoint configured with: %s", eventEndpoint))
+	maxRetry := int(m.configs.dataSinkConfig.MaxRetry.Get())
+	m.logger.Log(fmt.Sprintf("datasink max retry configured with: %d", maxRetry))
 	// Setup the sink
 	m.dataSink = sfxclient.NewAsyncMultiTokenSink(
 		numChannels,
@@ -428,7 +437,9 @@ func (m *Server) setupDataSink() (err error) {
 		eventEndpoint,
 		"",
 		nil,
-		nil)
+		m.defaultDataSinkErrorHandler,
+		maxRetry,
+	)
 	m.dataSink.ShutdownTimeout = m.configs.dataSinkConfig.ShutdownTimeout.Get()
 	m.sfxclient.AddCallback(m.dataSink)
 	return
