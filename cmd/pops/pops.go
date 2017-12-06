@@ -333,7 +333,8 @@ func (m *Server) PutTokenOnContext(ctx context.Context, rw http.ResponseWriter, 
 		token = password
 		next.ServeHTTPC(context.WithValue(ctx, sfxclient.TokenCtxKey, token), rw, r)
 	} else {
-		m.logger.Log(log.Err, "Authentication failed without error (bad auth token)")
+		// request basic authentication if no forms of auth found
+		rw.Header().Set("WWW-Authenticate", "Basic")
 		rw.WriteHeader(http.StatusUnauthorized)
 		_, _ = rw.Write([]byte("Unauthorized"))
 		return
