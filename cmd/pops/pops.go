@@ -70,17 +70,19 @@ type popsConfig struct {
 	machineID               *distconf.Str
 	ingestPort              *distconf.Int
 	ecsMetadataPath         *distconf.Str
+	basicAuthRealm          *distconf.Str
 }
 
 // Load the client config values from distconf
 func (c *popsConfig) Load(conf *distconf.Distconf) {
 	c.minimalGracefulWaitTime = conf.Duration("POPS_GRACEFUL_MIN_WAIT_TIME", 5*time.Second)
 	c.maxGracefulWaitTime = conf.Duration("POPS_GRACEFUL_MAX_WAIT_TIME", 25*time.Second)
-	c.gracefulCheckInterval = conf.Duration("POPS_GRACEFUL_CHECK_INTERVAL", time.Second)
-	c.silentGracefulTime = conf.Duration("POPS_GRACEFUL_SILENT_TIME", time.Second*3)
+	c.gracefulCheckInterval = conf.Duration("POPS_GRACEFUL_CHECK_INTERVAL", 1*time.Second)
+	c.silentGracefulTime = conf.Duration("POPS_GRACEFUL_SILENT_TIME", 3*time.Second)
 	c.machineID = conf.Str("SF_SOURCE_NAME", "")
 	c.ingestPort = conf.Int("POPS_PORT", 8100)
 	c.ecsMetadataPath = conf.Str("ECS_CONTAINER_METADATA_FILE", "")
+	c.basicAuthRealm = conf.Str("BASIC_AUTH_REALM", "SignalFx")
 }
 
 type dataSinkConfig struct {
@@ -101,7 +103,7 @@ func (c *dataSinkConfig) Load(conf *distconf.Distconf) {
 	c.ShutdownTimeout = conf.Duration("DATA_SINK_SHUTDOWN_TIMEOUT", 3*time.Second)
 	c.NumChannels = conf.Int("NUM_CHANNELS", 50)
 	c.NumDrainingThreads = conf.Int("NUM_DRAINING_THREADS", 2)
-	c.BufferSize = conf.Int("CHANEL_SIZE", 1000000)
+	c.BufferSize = conf.Int("CHANNEL_SIZE", 1000000)
 	c.BatchSize = conf.Int("MAX_DRAIN_SIZE", 5000)
 	c.MaxRetry = conf.Int("MAX_RETRY", 1)
 }
@@ -333,7 +335,8 @@ func (m *Server) PutTokenOnContext(ctx context.Context, rw http.ResponseWriter, 
 		token = password
 		next.ServeHTTPC(context.WithValue(ctx, sfxclient.TokenCtxKey, token), rw, r)
 	} else {
-		m.logger.Log(log.Err, "Authentication failed without error (bad auth token)")
+		// request basic authentication if no forms of auth found
+		rw.Header().Set("WWW-Authenticate", fmt.Sprintf("Basic realm=\"%s\"", m.configs.mainConfig.basicAuthRealm.Get()))
 		rw.WriteHeader(http.StatusUnauthorized)
 		_, _ = rw.Write([]byte("Unauthorized"))
 		return

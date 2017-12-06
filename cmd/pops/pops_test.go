@@ -79,7 +79,7 @@ func TestSetupRetry(t *testing.T) {
 	m.SetupRetryDelay = time.Hour * 1000
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	// Should finish
@@ -94,7 +94,7 @@ func TestSetupRetry(t *testing.T) {
 	m = NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	m.SetupRetryAttempts = 2
@@ -139,7 +139,7 @@ func TestSetupDebugServer(t *testing.T) {
 	_ = setupServer(m, map[string]string{
 		"POPS_DEBUGPORT":       "1234",
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	go m.main()
@@ -166,7 +166,7 @@ func TestClose1(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	go m.main()
@@ -291,7 +291,7 @@ func TestMainFailSetup(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer m.Close()
@@ -306,7 +306,7 @@ func TestSetupRetryFailure(t *testing.T) {
 	m.SetupRetryAttempts = 1
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer m.Close()
@@ -315,7 +315,7 @@ func TestSetupRetryFailure(t *testing.T) {
 	_ = setupServer(m, map[string]string{
 		"POPS_DEBUGPORT":       "7891",
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer listener.Close()
@@ -328,7 +328,7 @@ func TestMainSetupFailure(t *testing.T) {
 	m.SetupRetryAttempts = 1
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer m.Close()
@@ -343,7 +343,7 @@ func TestSbingestExpvar(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer m.Close()
@@ -365,7 +365,7 @@ func TestSetupHttpServerFailure(t *testing.T) {
 		"POPS_PORT":            "99999",
 		"SF_SOURCE_NAME":       "pops",
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	assert.NoError(t, m.setupConfig())
@@ -380,7 +380,7 @@ func TestHealthCheck(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	now := time.Now()
@@ -449,7 +449,7 @@ func TestShutdown(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 		"LOG_DIR":              "/tmp",
 	})
@@ -465,7 +465,7 @@ func TestEventualGracefulShutdown(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	now := time.Now()
@@ -512,7 +512,7 @@ func TestUnauthSend(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer m.Close()
@@ -531,7 +531,7 @@ func TestSendDatapointV2(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer m.Close()
@@ -559,7 +559,7 @@ func TestSendDatapointV1(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer m.Close()
@@ -581,7 +581,7 @@ func TestDecodeDatapointsBadDecoder(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer m.Close()
@@ -601,7 +601,7 @@ func TestSendCollectdDatapoint(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANEL_SIZE":          "10",
+		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
 	defer m.Close()
