@@ -5,7 +5,7 @@ jobs:
       - image: circleci/golang:1.9
     environment:
       - NUM_DRAINING_THREADS: "2"
-      - CHANEL_SIZE:          "10"
+      - CHANNEL_SIZE:          "10"
       - MAX_DRAIN_SIZE:       "50"
     working_directory: /go/src/github.com/signalfx/pops
 
