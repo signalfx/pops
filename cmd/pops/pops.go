@@ -78,7 +78,7 @@ func (c *popsConfig) Load(conf *distconf.Distconf) {
 	c.minimalGracefulWaitTime = conf.Duration("POPS_GRACEFUL_MIN_WAIT_TIME", 5*time.Second)
 	c.maxGracefulWaitTime = conf.Duration("POPS_GRACEFUL_MAX_WAIT_TIME", 25*time.Second)
 	c.gracefulCheckInterval = conf.Duration("POPS_GRACEFUL_CHECK_INTERVAL", 1*time.Second)
-	c.silentGracefulTime = conf.Duration("POPS_GRACEFUL_SILENT_TIME", time.Second*3)
+	c.silentGracefulTime = conf.Duration("POPS_GRACEFUL_SILENT_TIME", 3*time.Second)
 	c.machineID = conf.Str("SF_SOURCE_NAME", "")
 	c.ingestPort = conf.Int("POPS_PORT", 8100)
 	c.ecsMetadataPath = conf.Str("ECS_CONTAINER_METADATA_FILE", "")
