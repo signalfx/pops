@@ -20,7 +20,7 @@ gobuild:
 	gobuild --verbose check
 
 race:
-	go test -race ./...
+	go test -race -v ./...
 
 binary: # create an output directory and build the binaries for the desired version
 	mkdir -p $(CURDIR)/output/$(GOOS)
