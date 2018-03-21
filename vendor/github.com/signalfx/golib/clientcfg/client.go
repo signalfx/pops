@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"context"
 	"github.com/signalfx/golib/datapoint"
 	"github.com/signalfx/golib/distconf"
 	"github.com/signalfx/golib/errors"
@@ -14,27 +15,28 @@ import (
 	"github.com/signalfx/golib/logkey"
 	"github.com/signalfx/golib/sfxclient"
 	"github.com/signalfx/golib/timekeeper"
-	"golang.org/x/net/context"
 )
 
 // ClientConfig configures a SfxClient
 type ClientConfig struct {
-	SourceName        *distconf.Str
-	AuthToken         *distconf.Str
-	Endpoint          *distconf.Str
-	ReportingInterval *distconf.Duration
-	TimeKeeper        timekeeper.TimeKeeper
-	OsHostname        func() (name string, err error)
+	SourceName         *distconf.Str
+	AuthToken          *distconf.Str
+	Endpoint           *distconf.Str
+	ReportingInterval  *distconf.Duration
+	TimeKeeper         timekeeper.TimeKeeper
+	OsHostname         func() (name string, err error)
+	DisableCompression *distconf.Bool
 }
 
 // Load the client config values from distconf
 func (c *ClientConfig) Load(d *distconf.Distconf) {
-	c.SourceName = d.Str("sourceName", "")
-	c.AuthToken = d.Str("auth_token", "")
-	c.Endpoint = d.Str("statsendpoint", "")
-	c.ReportingInterval = d.Duration("report_interval", time.Second)
+	c.SourceName = d.Str("signalfuse.sourceName", "")
+	c.AuthToken = d.Str("sf.metrics.auth_token", "")
+	c.Endpoint = d.Str("sf.metrics.statsendpoint", "")
+	c.ReportingInterval = d.Duration("sf.metrics.report_interval", time.Second)
 	c.TimeKeeper = timekeeper.RealTime{}
 	c.OsHostname = os.Hostname
+	c.DisableCompression = d.Bool("sf.metrics.disableCompression", false)
 }
 
 // DefaultDimensions extracts default sfxclient dimensions that identify the host
@@ -71,9 +73,10 @@ func WatchSinkChanges(sink sfxclient.Sink, Conf *ClientConfig, logger log.Logger
 	}
 	ret.authTokenWatch(Conf.AuthToken, "")
 	ret.endpointWatch(Conf.Endpoint, "")
-	ret.endpointWatch(Conf.Endpoint, "")
+	ret.disableCompressionWatch(Conf.DisableCompression, false)
 	Conf.Endpoint.Watch(ret.endpointWatch)
 	Conf.AuthToken.Watch(ret.authTokenWatch)
+	Conf.DisableCompression.Watch(ret.disableCompressionWatch)
 	return ret
 }
 
@@ -82,6 +85,13 @@ func (s *ClientConfigChangerSink) AddDatapoints(ctx context.Context, points []*d
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.Destination.AddDatapoints(ctx, points)
+}
+
+func (s *ClientConfigChangerSink) disableCompressionWatch(new *distconf.Bool, old bool) {
+	s.logger.Log("disableCompression watch")
+	s.mu.Lock()
+	s.Destination.DisableCompression = new.Get()
+	s.mu.Unlock()
 }
 
 func (s *ClientConfigChangerSink) authTokenWatch(str *distconf.Str, oldValue string) {

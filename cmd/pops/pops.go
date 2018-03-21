@@ -20,7 +20,7 @@ import (
 	"syscall"
 	"time"
 
-	lumberjack "gopkg.in/natefinch/lumberjack.v2"
+	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/signalfx/pops/cmd/debugServer"
 
@@ -39,6 +39,7 @@ import (
 	"github.com/signalfx/metricproxy/protocol/signalfx"
 
 	"github.com/signalfx/golib/clientcfg"
+	"github.com/signalfx/metricproxy/protocol/zipper"
 	"golang.org/x/net/context"
 )
 
@@ -124,6 +125,8 @@ func (c *clientConfig) Load(conf *distconf.Distconf) {
 	c.clientConfig.Endpoint = conf.Str("SF_METRICS_STATSENDPOINT", sfxclient.IngestEndpointV2)
 	// sf.metrics.report_interval
 	c.clientConfig.ReportingInterval = conf.Duration("SF_METRICS_REPORT_INTERVAL", 5*time.Second)
+	// sf.metrics.disableCompression
+	c.clientConfig.DisableCompression = conf.Bool("SF_METRICS_DISABLE_COMPRESSION", false)
 	c.clientConfig.TimeKeeper = timekeeper.RealTime{}
 	c.clientConfig.OsHostname = os.Hostname
 }
@@ -277,20 +280,28 @@ func (m *Server) newIncomingCounter(sink dpsink.Sink, name string) dpsink.Sink {
 	return endingSink
 }
 
-func (m *Server) setupJSONV2(r *mux.Router, sink dpsink.Sink) sfxclient.Collector {
+func (m *Server) setupJSONDatapointV2(r *mux.Router, sink dpsink.Sink) []sfxclient.Collector {
 	j2 := &signalfx.JSONDecoderV2{Sink: sink, Logger: m.sfxClientLogger}
-	m.setupDatapointEndpoint(r, j2, signalfx.SetupJSONV2DatapointPaths)
-	m.setupDatapointEndpoint(r, &signalfx.JSONEventDecoderV2{Sink: sink, Logger: m.sfxClientLogger}, signalfx.SetupJSONV2EventPaths)
-	return j2
+	zd := m.setupDatapointEndpoint(r, j2, signalfx.SetupJSONV2DatapointPaths)
+	return []sfxclient.Collector{j2, zd}
 }
 
-func (m *Server) setupProtobufV2(r *mux.Router, sink dpsink.Sink) {
-	m.setupDatapointEndpoint(r, &signalfx.ProtobufDecoderV2{Sink: sink, Logger: m.sfxClientLogger}, signalfx.SetupProtobufV2DatapointPaths)
-	m.setupDatapointEndpoint(r, &signalfx.ProtobufEventDecoderV2{Sink: sink, Logger: m.sfxClientLogger}, signalfx.SetupProtobufV2EventPaths)
+func (m *Server) setupJSONEventV2(r *mux.Router, sink dpsink.Sink) sfxclient.Collector {
+	j2e := &signalfx.JSONEventDecoderV2{Sink: sink, Logger: m.sfxClientLogger}
+	ze := m.setupDatapointEndpoint(r, j2e, signalfx.SetupJSONV2EventPaths)
+	return ze
 }
 
-func (m *Server) setupCollectd(r *mux.Router, sink dpsink.Sink) {
-	m.setupDatapointEndpoint(r, &collectd.JSONDecoder{SendTo: sink, Logger: m.sfxClientLogger}, func(r *mux.Router, handler http.Handler) {
+func (m *Server) setupDatapointProtobufV2(r *mux.Router, sink dpsink.Sink) sfxclient.Collector {
+	return m.setupDatapointEndpoint(r, &signalfx.ProtobufDecoderV2{Sink: sink, Logger: m.sfxClientLogger}, signalfx.SetupProtobufV2DatapointPaths)
+}
+
+func (m *Server) setupEventProtobufV2(r *mux.Router, sink dpsink.Sink) sfxclient.Collector {
+	return m.setupDatapointEndpoint(r, &signalfx.ProtobufEventDecoderV2{Sink: sink, Logger: m.sfxClientLogger}, signalfx.SetupProtobufV2EventPaths)
+}
+
+func (m *Server) setupCollectd(r *mux.Router, sink dpsink.Sink) sfxclient.Collector {
+	return m.setupDatapointEndpoint(r, &collectd.JSONDecoder{SendTo: sink, Logger: m.sfxClientLogger}, func(r *mux.Router, handler http.Handler) {
 		collectd.SetupCollectdPaths(r, handler, "/v1/collectd")
 	})
 }
@@ -301,15 +312,16 @@ func (c constTypeGetter) GetMetricTypeFromMap(metricName string) com_signalfx_me
 	return com_signalfx_metrics_protobuf.MetricType(c)
 }
 
-func (m *Server) setupJSONV1(r *mux.Router, sink dpsink.DSink) {
-	m.setupDatapointEndpoint(r, &signalfx.JSONDecoderV1{Sink: sink, TypeGetter: constTypeGetter(com_signalfx_metrics_protobuf.MetricType_GAUGE), Logger: m.sfxClientLogger}, signalfx.SetupJSONV1Paths)
+func (m *Server) setupDatapointJSONV1(r *mux.Router, sink dpsink.DSink) sfxclient.Collector {
+	return m.setupDatapointEndpoint(r, &signalfx.JSONDecoderV1{Sink: sink, TypeGetter: constTypeGetter(com_signalfx_metrics_protobuf.MetricType_GAUGE), Logger: m.sfxClientLogger}, signalfx.SetupJSONV1Paths)
 }
 
-func (m *Server) setupProtobufV1(r *mux.Router, sink dpsink.DSink) {
-	m.setupDatapointEndpoint(r, &signalfx.ProtobufDecoderV1{Sink: sink, TypeGetter: constTypeGetter(com_signalfx_metrics_protobuf.MetricType_GAUGE), Logger: m.sfxClientLogger}, signalfx.SetupProtobufV1Paths)
+func (m *Server) setupDatapointProtobufV1(r *mux.Router, sink dpsink.DSink) sfxclient.Collector {
+	return m.setupDatapointEndpoint(r, &signalfx.ProtobufDecoderV1{Sink: sink, TypeGetter: constTypeGetter(com_signalfx_metrics_protobuf.MetricType_GAUGE), Logger: m.sfxClientLogger}, signalfx.SetupProtobufV1Paths)
 }
 
-func (m *Server) setupDatapointEndpoint(r *mux.Router, reader signalfx.ErrorReader, handlerSetup func(r *mux.Router, handler http.Handler)) {
+func (m *Server) setupDatapointEndpoint(r *mux.Router, reader signalfx.ErrorReader, handlerSetup func(r *mux.Router, handler http.Handler)) sfxclient.Collector {
+	zippers := zipper.NewZipper()
 	tracker := &decodeErrorTracker{
 		reader:      reader,
 		TotalErrors: &m.stats.TotalDecodeErrors,
@@ -323,7 +335,8 @@ func (m *Server) setupDatapointEndpoint(r *mux.Router, reader signalfx.ErrorRead
 		web.NextHTTP(m.stats.BucketRequestCounter.ServeHTTP),
 	}
 	handler := web.NewHandler(m.ctx, tracker).Add(middleLayers...)
-	handlerSetup(r, handler)
+	handlerSetup(r, zippers.GzipHandler(handler))
+	return zippers
 }
 
 // PutTokenOnContext extracts an access token from the request headers and assigns it to the context
@@ -459,14 +472,23 @@ func (m *Server) setupHTTPServer() error {
 
 	handler.NotFoundHandler = web.NewHandler(m.ctx, web.FromHTTP(http.NotFoundHandler())).Add(web.NextHTTP(m.stats.NotFoundRequestCounter.ServeHTTP))
 
-	// setup the endpoints for differetnt data types
 	dims := m.getDefaultDims(&m.configs.clientConfig.clientConfig)
-	m.setupProtobufV2(handler, m.newIncomingCounter(m.dataSink, "sfx_protobuf_v2"))
-	m.sfxclient.AddGroupedCallback("JSONV2", m.setupJSONV2(handler, m.newIncomingCounter(m.dataSink, "sfx_json_v2")))
-	m.sfxclient.GroupedDefaultDimensions("JSONV2", datapoint.AddMaps(dims, map[string]string{"instance": "pops", "path": "decoding", "protocol": "sfx_json_v2"}))
-	m.setupCollectd(handler, m.newIncomingCounter(m.dataSink, "sfx_collectd_v1"))
-	m.setupProtobufV1(handler, m.newIncomingCounter(m.dataSink, "sfx_protobuf_v1"))
-	m.setupJSONV1(handler, m.newIncomingCounter(m.dataSink, "sfx_json_v1"))
+
+	cf := func(g string, cs ...sfxclient.Collector) {
+		for _, c := range cs {
+			m.sfxclient.AddGroupedCallback(g, c)
+		}
+		m.sfxclient.GroupedDefaultDimensions(g, datapoint.AddMaps(dims, map[string]string{"instance": "pops", "path": "decoding", "protocol": g}))
+	}
+
+	// setup the endpoints for differetnt data types
+	cf("sfx_protobuf_v2", m.setupDatapointProtobufV2(handler, m.newIncomingCounter(m.dataSink, "sfx_protobuf_v2")))
+	cf("event_protobuf_v2", m.setupEventProtobufV2(handler, m.newIncomingCounter(m.dataSink, "event_protobuf_v2")))
+	cf("sfx_json_v2", m.setupJSONDatapointV2(handler, m.newIncomingCounter(m.dataSink, "sfx_json_v2"))...)
+	cf("event_json_v2", m.setupJSONEventV2(handler, m.newIncomingCounter(m.dataSink, "event_json_v2")))
+	cf("sfx_collectd_v1", m.setupCollectd(handler, m.newIncomingCounter(m.dataSink, "sfx_collectd_v1")))
+	cf("sfx_protobuf_v1", m.setupDatapointProtobufV1(handler, m.dataSink))
+	cf("sfx_json_v1", m.setupDatapointJSONV1(handler, m.dataSink))
 
 	m.setupHealthCheck(handler)
 	m.server = &http.Server{
