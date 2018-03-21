@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"expvar"
 	"fmt"
@@ -26,6 +27,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/signalfx/com_signalfx_metrics_protobuf"
+	"github.com/signalfx/golib/clientcfg"
 	"github.com/signalfx/golib/datapoint"
 	"github.com/signalfx/golib/datapoint/dpsink"
 	"github.com/signalfx/golib/distconf"
@@ -37,10 +39,7 @@ import (
 	"github.com/signalfx/golib/web"
 	"github.com/signalfx/metricproxy/protocol/collectd"
 	"github.com/signalfx/metricproxy/protocol/signalfx"
-
-	"github.com/signalfx/golib/clientcfg"
 	"github.com/signalfx/metricproxy/protocol/zipper"
-	"golang.org/x/net/context"
 )
 
 // stats are internal tracking stats about pops's core main server
@@ -223,6 +222,7 @@ func (s *scheduledServices) Add(ctx context.Context, f func(context.Context) err
 		cancelFunc()
 		<-errResult
 	case err := <-errResult:
+		cancelFunc()
 		s.ErrorHandler(err)
 	}
 }
