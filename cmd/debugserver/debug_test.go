@@ -1,4 +1,4 @@
-package debugServer
+package debugserver
 
 import (
 	"testing"

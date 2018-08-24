@@ -23,7 +23,7 @@ import (
 
 	"gopkg.in/natefinch/lumberjack.v2"
 
-	"github.com/signalfx/pops/cmd/debugServer"
+	"github.com/signalfx/pops/cmd/debugserver"
 
 	"github.com/gorilla/mux"
 	"github.com/signalfx/com_signalfx_metrics_protobuf"
@@ -36,6 +36,7 @@ import (
 	"github.com/signalfx/golib/reportsha"
 	"github.com/signalfx/golib/sfxclient"
 	"github.com/signalfx/golib/timekeeper"
+	"github.com/signalfx/golib/trace"
 	"github.com/signalfx/golib/web"
 	"github.com/signalfx/metricproxy/protocol/collectd"
 	"github.com/signalfx/metricproxy/protocol/signalfx"
@@ -88,6 +89,7 @@ func (c *popsConfig) Load(conf *distconf.Distconf) {
 type dataSinkConfig struct {
 	DatapointEndpoint  *distconf.Str
 	EventEndpoint      *distconf.Str
+	TraceEndpoint      *distconf.Str
 	ShutdownTimeout    *distconf.Duration
 	NumDrainingThreads *distconf.Int
 	NumChannels        *distconf.Int
@@ -100,6 +102,7 @@ type dataSinkConfig struct {
 func (c *dataSinkConfig) Load(conf *distconf.Distconf) {
 	c.DatapointEndpoint = conf.Str("DATA_SINK_DP_ENDPOINT", sfxclient.IngestEndpointV2)
 	c.EventEndpoint = conf.Str("DATA_SINK_EVENT_ENDPOINT", sfxclient.EventIngestEndpointV2)
+	c.TraceEndpoint = conf.Str("DATA_SINK_TRACE_ENDPOINTl", sfxclient.TraceIngestEndpointV1)
 	c.ShutdownTimeout = conf.Duration("DATA_SINK_SHUTDOWN_TIMEOUT", 3*time.Second)
 	c.NumChannels = conf.Int("NUM_CHANNELS", 50)
 	c.NumDrainingThreads = conf.Int("NUM_DRAINING_THREADS", 2)
@@ -149,7 +152,7 @@ func (e *decodeErrorTracker) ServeHTTPC(ctx context.Context, rw http.ResponseWri
 
 type libraryConfigs struct {
 	clientConfig   clientConfig
-	debugConfig    debugServer.Config
+	debugConfig    debugserver.Config
 	mainConfig     popsConfig
 	dataSinkConfig dataSinkConfig
 }
@@ -237,7 +240,7 @@ type Server struct {
 	setupDone          chan struct{}
 	SetupRetryDelay    time.Duration
 	standardHeaders    web.HeadersInRequest
-	debugServer        *debugServer.DebugServer
+	debugServer        *debugserver.DebugServer
 	httpListener       net.Listener
 	timeKeeper         timekeeper.TimeKeeper
 	sfxclient          *sfxclient.Scheduler
@@ -267,11 +270,11 @@ func (m *Server) defaultSchedulerErrorHandler(err error) {
 	m.logger.Log(log.Err, err, "Error on scheduled service")
 }
 
-func (m *Server) newIncomingCounter(sink dpsink.Sink, name string) dpsink.Sink {
-	count := &dpsink.Counter{
+func (m *Server) newIncomingCounter(sink signalfx.Sink, name string) signalfx.Sink {
+	count := dpsink.NewHistoCounter(&dpsink.Counter{
 		Logger: m.sfxClientLogger,
-	}
-	endingSink := dpsink.FromChain(sink, dpsink.NextWrap(count))
+	})
+	endingSink := signalfx.FromChain(sink, signalfx.NextWrap(signalfx.UnifyNextSinkWrap(count)))
 	m.sfxclient.AddGroupedCallback(name, count)
 	dims := m.getDefaultDims(&m.configs.clientConfig.clientConfig)
 	dims["protocol"] = name
@@ -318,6 +321,22 @@ func (m *Server) setupDatapointJSONV1(r *mux.Router, sink dpsink.DSink) sfxclien
 
 func (m *Server) setupDatapointProtobufV1(r *mux.Router, sink dpsink.DSink) sfxclient.Collector {
 	return m.setupDatapointEndpoint(r, &signalfx.ProtobufDecoderV1{Sink: sink, TypeGetter: constTypeGetter(com_signalfx_metrics_protobuf.MetricType_GAUGE), Logger: m.sfxClientLogger}, signalfx.SetupProtobufV1Paths)
+}
+
+// setupSpanJSONV1 this is our v1, not zipkin's v1 format
+func (m *Server) setupSpanJSONV1(r *mux.Router, sink trace.Sink) sfxclient.Collector {
+	handlerSetup := func(r *mux.Router, handler http.Handler) {
+		signalfx.SetupJSONByPaths(r, handler, signalfx.DefaultTracePathV1)
+	}
+	return m.setupDatapointEndpoint(r, &signalfx.JSONTraceDecoderV1{Sink: sink, Logger: m.sfxClientLogger}, handlerSetup)
+}
+
+// setupSpanThriftV1 this is our v1, not zipkin's v1 format
+func (m *Server) setupSpanThriftV1(r *mux.Router, sink trace.Sink) sfxclient.Collector {
+	handlerSetup := func(r *mux.Router, handler http.Handler) {
+		signalfx.SetupThriftByPaths(r, handler, signalfx.DefaultTracePathV1)
+	}
+	return m.setupDatapointEndpoint(r, signalfx.NewJaegerThriftTraceDecoderV1(m.sfxClientLogger, sink), handlerSetup)
 }
 
 func (m *Server) setupDatapointEndpoint(r *mux.Router, reader signalfx.ErrorReader, handlerSetup func(r *mux.Router, handler http.Handler)) sfxclient.Collector {
@@ -441,6 +460,8 @@ func (m *Server) setupDataSink() (err error) {
 	m.logger.Log(fmt.Sprintf("dataSink datapoint endpoint configured with: %s", datapointEndpoint))
 	eventEndpoint := m.configs.dataSinkConfig.EventEndpoint.Get()
 	m.logger.Log(fmt.Sprintf("dataSink event endpoint configured with: %s", eventEndpoint))
+	traceEndpoint := m.configs.dataSinkConfig.TraceEndpoint.Get()
+	m.logger.Log(fmt.Sprintf("dataSink trace endpoint configured with: %s", traceEndpoint))
 	maxRetry := int(m.configs.dataSinkConfig.MaxRetry.Get())
 	m.logger.Log(fmt.Sprintf("datasink max retry configured with: %d", maxRetry))
 	// Setup the sink
@@ -451,6 +472,7 @@ func (m *Server) setupDataSink() (err error) {
 		batchSize,
 		datapointEndpoint,
 		eventEndpoint,
+		traceEndpoint,
 		"",
 		nil,
 		m.defaultDataSinkErrorHandler,
@@ -461,6 +483,7 @@ func (m *Server) setupDataSink() (err error) {
 	return
 }
 
+// TODO refactor this with sbingest's setupHTTPServer maybe?
 func (m *Server) setupHTTPServer() error {
 	m.logger.Log("Setting up http server")
 	sbPort := m.configs.mainConfig.ingestPort.Get()
@@ -489,6 +512,8 @@ func (m *Server) setupHTTPServer() error {
 	cf("sfx_collectd_v1", m.setupCollectd(handler, m.newIncomingCounter(m.dataSink, "sfx_collectd_v1")))
 	cf("sfx_protobuf_v1", m.setupDatapointProtobufV1(handler, m.dataSink))
 	cf("sfx_json_v1", m.setupDatapointJSONV1(handler, m.dataSink))
+	cf("span_thrift_v1", m.setupSpanThriftV1(handler, m.newIncomingCounter(m.dataSink, "span_thrift_v1")))
+	cf("span_json_v1", m.setupSpanJSONV1(handler, m.newIncomingCounter(m.dataSink, "span_json_v1")))
 
 	m.setupHealthCheck(handler)
 	m.server = &http.Server{
@@ -558,7 +583,7 @@ var BuildDate = ""
 func (m *Server) setupDebugServer() error {
 	var err error
 	handler := mux.NewRouter()
-	m.debugServer, err = debugServer.NewDebugServer(&m.configs.debugConfig, m, handler)
+	m.debugServer, err = debugserver.NewDebugServer(&m.configs.debugConfig, m, handler)
 	if err != nil {
 		return err
 	}
