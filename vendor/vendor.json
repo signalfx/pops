@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "B6ZUzckOOwd699eDnJIPqDiWB0I=",
+			"path": "github.com/apache/thrift/lib/go/thrift",
+			"revision": "858809fad01dba7318c33dc30f6cc92a6e2ac7b1",
+			"revisionTime": "2018-04-11T17:46:21Z"
+		},
+		{
 			"checksumSHA1": "mrz/kicZiUaHxkyfvC/DyQcr8Do=",
 			"path": "github.com/davecgh/go-spew/spew",
 			"revision": "ecdeabc65495df2dec95d7c4a4c3e021903035e5",
@@ -31,6 +37,12 @@
 			"path": "github.com/gorilla/mux",
 			"revision": "7f08801859139f86dfafd1c296e2cba9a80d292e",
 			"revisionTime": "2017-11-05T17:23:20Z"
+		},
+		{
+			"checksumSHA1": "ZYUreHegVe92tsafYOGX2Px/HeI=",
+			"path": "github.com/jaegertracing/jaeger/thrift-gen/jaeger",
+			"revision": "afefdf1a41e56af5b9954e094b2780e81fa15e18",
+			"revisionTime": "2018-08-23T18:30:57Z"
 		},
 		{
 			"checksumSHA1": "Js/yx9fZ3+wH1wZpHNIxSTMIaCg=",
@@ -67,6 +79,24 @@
 			"path": "github.com/mailru/easyjson/jwriter",
 			"revision": "03f2033d19d5860aef995fe360ac7d395cd8ce65",
 			"revisionTime": "2018-07-30T09:45:02Z"
+		},
+		{
+			"checksumSHA1": "wIcN7tZiF441h08RHAm4NV8cYO4=",
+			"path": "github.com/opentracing/opentracing-go",
+			"revision": "bd9c3193394760d98b2fa6ebb2291f0cd1d06a7d",
+			"revisionTime": "2018-06-06T20:41:48Z"
+		},
+		{
+			"checksumSHA1": "uhDxBvLEqRAMZKgpTZ8MFuLIIM8=",
+			"path": "github.com/opentracing/opentracing-go/ext",
+			"revision": "bd9c3193394760d98b2fa6ebb2291f0cd1d06a7d",
+			"revisionTime": "2018-06-06T20:41:48Z"
+		},
+		{
+			"checksumSHA1": "tnkdNJbJxNKuPZMWapP1xhKIIGw=",
+			"path": "github.com/opentracing/opentracing-go/log",
+			"revision": "bd9c3193394760d98b2fa6ebb2291f0cd1d06a7d",
+			"revisionTime": "2018-06-06T20:41:48Z"
 		},
 		{
 			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
@@ -213,40 +243,52 @@
 			"revisionTime": "2018-08-24T19:05:13Z"
 		},
 		{
-			"checksumSHA1": "AReDupN/wZEJXfkUdXTroTNCKU4=",
+			"checksumSHA1": "Aaj0BfHvrL9vIf6SLYSvCZahTJM=",
 			"path": "github.com/signalfx/metricproxy/logkey",
-			"revision": "1b6e717534eced90e2f2162fe72a09e78906d37d",
-			"revisionTime": "2018-05-21T21:36:33Z"
+			"revision": "b408690dae72ed65eda38bb335651edb47217fbd",
+			"revisionTime": "2018-08-15T18:23:11Z"
 		},
 		{
 			"checksumSHA1": "YSeaRqGc/CBjAJgFQldSggXRk2Y=",
 			"path": "github.com/signalfx/metricproxy/protocol",
-			"revision": "1b6e717534eced90e2f2162fe72a09e78906d37d",
-			"revisionTime": "2018-05-21T21:36:33Z"
+			"revision": "b408690dae72ed65eda38bb335651edb47217fbd",
+			"revisionTime": "2018-08-15T18:23:11Z"
 		},
 		{
-			"checksumSHA1": "rPdMUW1o4ZwGaN7tiA5/jkN3qKY=",
+			"checksumSHA1": "82ZQA9FR//h1OX9h/HibIaBWEHg=",
 			"path": "github.com/signalfx/metricproxy/protocol/collectd",
-			"revision": "1b6e717534eced90e2f2162fe72a09e78906d37d",
-			"revisionTime": "2018-05-21T21:36:33Z"
+			"revision": "b408690dae72ed65eda38bb335651edb47217fbd",
+			"revisionTime": "2018-08-15T18:23:11Z"
+		},
+		{
+			"checksumSHA1": "FX57XoD3GUkLRyvdXpP6skfmpwM=",
+			"path": "github.com/signalfx/metricproxy/protocol/collectd/format",
+			"revision": "b408690dae72ed65eda38bb335651edb47217fbd",
+			"revisionTime": "2018-08-15T18:23:11Z"
 		},
 		{
 			"checksumSHA1": "f0IOYTDP2wbWPvzS9+fdjkB9KYQ=",
 			"path": "github.com/signalfx/metricproxy/protocol/filtering",
-			"revision": "1b6e717534eced90e2f2162fe72a09e78906d37d",
-			"revisionTime": "2018-05-21T21:36:33Z"
+			"revision": "b408690dae72ed65eda38bb335651edb47217fbd",
+			"revisionTime": "2018-08-15T18:23:11Z"
 		},
 		{
-			"checksumSHA1": "V+x+CaK5u6vaA7+LoPBeWEHwxsQ=",
+			"checksumSHA1": "2kM8viNoByFZHAoa9/m8385bVoU=",
 			"path": "github.com/signalfx/metricproxy/protocol/signalfx",
-			"revision": "1b6e717534eced90e2f2162fe72a09e78906d37d",
-			"revisionTime": "2018-05-21T21:36:33Z"
+			"revision": "b408690dae72ed65eda38bb335651edb47217fbd",
+			"revisionTime": "2018-08-15T18:23:11Z"
+		},
+		{
+			"checksumSHA1": "gVOSHnCE5jnV5UB7+fcTJ3Yn7Ao=",
+			"path": "github.com/signalfx/metricproxy/protocol/signalfx/format",
+			"revision": "b408690dae72ed65eda38bb335651edb47217fbd",
+			"revisionTime": "2018-08-15T18:23:11Z"
 		},
 		{
 			"checksumSHA1": "qJI9jjDoLN9YYVun/i+fqSIOsRY=",
 			"path": "github.com/signalfx/metricproxy/protocol/zipper",
-			"revision": "1b6e717534eced90e2f2162fe72a09e78906d37d",
-			"revisionTime": "2018-05-21T21:36:33Z"
+			"revision": "b408690dae72ed65eda38bb335651edb47217fbd",
+			"revisionTime": "2018-08-15T18:23:11Z"
 		},
 		{
 			"checksumSHA1": "ozRFnFdTG0IjkTE0RkZn71XO4gw=",
@@ -297,10 +339,106 @@
 			"revisionTime": "2017-08-14T20:04:35Z"
 		},
 		{
+			"checksumSHA1": "/2JFqgFUE7tTkl7l5ydBoiZcZas=",
+			"path": "github.com/uber-go/atomic",
+			"revision": "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289",
+			"revisionTime": "2018-05-01T17:38:09Z"
+		},
+		{
+			"checksumSHA1": "UVbKbWVD3bdxgQsyf2dDv7Ob/8g=",
+			"path": "github.com/uber/tchannel-go",
+			"revision": "7f5c12c66261f3ac3c5dde959d65eed59e3b63af",
+			"revisionTime": "2018-06-25T23:58:32Z"
+		},
+		{
+			"checksumSHA1": "DbsGhP/AZ3af1FBcK4H5iN1Pw6c=",
+			"path": "github.com/uber/tchannel-go/internal/argreader",
+			"revision": "7f5c12c66261f3ac3c5dde959d65eed59e3b63af",
+			"revisionTime": "2018-06-25T23:58:32Z"
+		},
+		{
+			"checksumSHA1": "NzqIA7roD4UC9tiOPzzx0jbpNWM=",
+			"path": "github.com/uber/tchannel-go/relay",
+			"revision": "7f5c12c66261f3ac3c5dde959d65eed59e3b63af",
+			"revisionTime": "2018-06-25T23:58:32Z"
+		},
+		{
+			"checksumSHA1": "wQrlRSEI1BMkIftWKB5KH5V8tjg=",
+			"path": "github.com/uber/tchannel-go/thrift",
+			"revision": "7f5c12c66261f3ac3c5dde959d65eed59e3b63af",
+			"revisionTime": "2018-06-25T23:58:32Z"
+		},
+		{
+			"checksumSHA1": "VTeZRY6WypU0K1OTR0uld+ptiIQ=",
+			"path": "github.com/uber/tchannel-go/thrift/gen-go/meta",
+			"revision": "7f5c12c66261f3ac3c5dde959d65eed59e3b63af",
+			"revisionTime": "2018-06-25T23:58:32Z"
+		},
+		{
+			"checksumSHA1": "mCjQs+3iW11WB9OLlTyVOCVcfRQ=",
+			"path": "github.com/uber/tchannel-go/tnet",
+			"revision": "7f5c12c66261f3ac3c5dde959d65eed59e3b63af",
+			"revisionTime": "2018-06-25T23:58:32Z"
+		},
+		{
+			"checksumSHA1": "L3+bDi3r3j60MmxgRDjAEOn/OLE=",
+			"path": "github.com/uber/tchannel-go/tos",
+			"revision": "7f5c12c66261f3ac3c5dde959d65eed59e3b63af",
+			"revisionTime": "2018-06-25T23:58:32Z"
+		},
+		{
+			"checksumSHA1": "t/73uRbOsGXuJ/q3euKQXOo2/uw=",
+			"path": "github.com/uber/tchannel-go/trand",
+			"revision": "7f5c12c66261f3ac3c5dde959d65eed59e3b63af",
+			"revisionTime": "2018-06-25T23:58:32Z"
+		},
+		{
+			"checksumSHA1": "jHj7whDsVm/3L930EUPQCnFpRpI=",
+			"path": "github.com/uber/tchannel-go/typed",
+			"revision": "7f5c12c66261f3ac3c5dde959d65eed59e3b63af",
+			"revisionTime": "2018-06-25T23:58:32Z"
+		},
+		{
 			"checksumSHA1": "sFD8LpJPQtWLwGda3edjf5mNUbs=",
 			"path": "github.com/vaughan0/go-ini",
 			"revision": "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1",
 			"revisionTime": "2013-09-23T14:52:12Z"
+		},
+		{
+			"checksumSHA1": "NjyXtXsaf0ulRJn6HQSP1FqGL4A=",
+			"path": "golang.org/x/net/bpf",
+			"revision": "922f4815f713f213882e8ef45e0d315b164d705c",
+			"revisionTime": "2018-08-02T22:19:15Z"
+		},
+		{
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
+			"path": "golang.org/x/net/context",
+			"revision": "922f4815f713f213882e8ef45e0d315b164d705c",
+			"revisionTime": "2018-08-02T22:19:15Z"
+		},
+		{
+			"checksumSHA1": "CHpYrf4HcmHB60gnTNxgjGgY53w=",
+			"path": "golang.org/x/net/internal/iana",
+			"revision": "922f4815f713f213882e8ef45e0d315b164d705c",
+			"revisionTime": "2018-08-02T22:19:15Z"
+		},
+		{
+			"checksumSHA1": "wUFe08HvcVTwkXK7dojH3W7CQVg=",
+			"path": "golang.org/x/net/internal/socket",
+			"revision": "922f4815f713f213882e8ef45e0d315b164d705c",
+			"revisionTime": "2018-08-02T22:19:15Z"
+		},
+		{
+			"checksumSHA1": "8oh/VHSXwwolyZ/ih9OnX/dEbPE=",
+			"path": "golang.org/x/net/ipv4",
+			"revision": "922f4815f713f213882e8ef45e0d315b164d705c",
+			"revisionTime": "2018-08-02T22:19:15Z"
+		},
+		{
+			"checksumSHA1": "BkhU1qHkaSY6zGUw3XmSx6YJVIU=",
+			"path": "golang.org/x/net/ipv6",
+			"revision": "922f4815f713f213882e8ef45e0d315b164d705c",
+			"revisionTime": "2018-08-02T22:19:15Z"
 		},
 		{
 			"checksumSHA1": "dEq3EOUlisOe0lOB3P8A3oU5PEM=",

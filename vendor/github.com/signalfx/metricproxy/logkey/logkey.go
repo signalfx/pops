@@ -11,10 +11,14 @@ func ignored() string {
 var (
 	// Filename is a system file name
 	Filename = log.Key("filename")
+	// Delta is the diff between two things, generally time
+	Delta = log.Key("delta")
 	// Dir is a directory
 	Dir = log.Key("directory")
 	// Struct is the name of a go struct
 	Struct = log.Key("struct")
+	// SHA1 is a SHA1 hash of something
+	SHA1 = log.Key("sha1")
 	// Config is the config passed to metricproxy
 	Config = log.Key("config")
 	// StatKeepers are a list of datapoint keepers
