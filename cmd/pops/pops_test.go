@@ -555,6 +555,29 @@ func TestSendDatapointV2(t *testing.T) {
 	assert.Equal(t, `"OK"`, rw.Body.String())
 }
 
+func TestSendSpanV1(t *testing.T) {
+	m := NewServer()
+	_ = setupServer(m, map[string]string{
+		"NUM_DRAINING_THREADS": "2",
+		"CHANNEL_SIZE":         "10",
+		"MAX_DRAIN_SIZE":       "50",
+	})
+	defer m.Close()
+	go m.main()
+	<-m.setupDone
+
+	rw := httptest.NewRecorder()
+	body := bytes.NewBuffer([]byte(`[{"traceId":"05d68b91f746bc97","id":"05d68b91f746bc97","name":"signalflowsocket.onwebsockettext","timestamp":1530215261156007,"duration":19242,"annotations":[{"timestamp":1530215261156007,"value":"sr","endpoint":{"serviceName":"signalboost","ipv4":"10.2.6.231"}},{"timestamp":1530215261175249,"value":"ss","endpoint":{"serviceName":"signalboost","ipv4":"10.2.6.231"}}],"binaryAnnotations":[{"key":"ca","value":true,"endpoint":{"serviceName":"","port":53018}},{"key":"component","value":"jetty-websocket","endpoint":{"serviceName":"signalboost","ipv4":"10.2.6.231"}},{"key":"peer.hostname","value":"localhost","endpoint":{"serviceName":"signalboost","ipv4":"10.2.6.231"}},{"key":"realm","value":"lab0","endpoint":{"serviceName":"signalboost","ipv4":"10.2.6.231"}},{"key":"request.type","value":"execute","endpoint":{"serviceName":"signalboost","ipv4":"10.2.6.231"}},{"key":"sf_namedTokenId","value":"DWMVK55AIAA","endpoint":{"serviceName":"signalboost","ipv4":"10.2.6.231"}},{"key":"sf_organizationID","value":"BqDQY5OAAAA","endpoint":{"serviceName":"signalboost","ipv4":"10.2.6.231"}},{"key":"source","value":"signalboost-rest-lab13--ccaa","endpoint":{"serviceName":"signalboost","ipv4":"10.2.6.231"}}]}]`))
+	req, _ := http.NewRequest("POST", "http://localhost:8080/v1/trace", body)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add(sfxclient.TokenHeaderName, "ABCD")
+	m.server.Handler.ServeHTTP(rw, req)
+
+	// Will get dropped
+	assert.Equal(t, http.StatusOK, rw.Code)
+	assert.Equal(t, `"OK"`, rw.Body.String())
+}
+
 func TestSendDatapointV1(t *testing.T) {
 	m := NewServer()
 	_ = setupServer(m, map[string]string{
