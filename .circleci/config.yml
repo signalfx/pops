@@ -2,22 +2,24 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.9
+      - image: circleci/golang:1.11.0
+
     environment:
-      - NUM_DRAINING_THREADS: "2"
-      - CHANNEL_SIZE:          "10"
-      - MAX_DRAIN_SIZE:       "50"
+      - GOOS: "linux"
+
     working_directory: /go/src/github.com/signalfx/pops
 
     steps:
       - checkout
       - run: 
-          name: Setup Build Dependencies
-          command: make setup-build-tools
-      - run:
-          name: Build Binary
-          command: make binary
+          name: Setup Build Tools
+          command: make install-build-tools
       - run:
           name: Go Build
           command: make gobuild
+      - run:
+          name: Build
+          command: make build
+      - store_artifacts:
+          path: /go/src/github.com/signalfx/pops/output/linux/pops
 

@@ -1,6 +1,6 @@
 [vars]
   ignoreDirs = [".git", "_example", "vendor", "scripts", ".idea", "output"]
-  testFlags = ["-covermode", "atomic", "-timeout", "120s", "-cpu", "4", "-parallel", "8"]
+  testFlags = ["-covermode", "atomic", "-race", "-timeout", "120s", "-cpu", "4", "-parallel", "8"]
   duplLimit = "300"
   testCoverage = 100.0
 
