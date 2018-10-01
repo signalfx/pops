@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"regexp"
 	"runtime"
 	"sync/atomic"
 	"syscall"
@@ -301,7 +302,10 @@ func TestMainFailSetup(t *testing.T) {
 }
 
 func TestSetupRetryFailure(t *testing.T) {
+	r, regerr := regexp.Compile("([\\d\\w\\.\\[\\:+\\]]+:(\\d+))")
+	assert.NoError(t, regerr, "regex for test is not compiling")
 	m := NewServer()
+	defer m.Close()
 	m.SetupRetryDelay = time.Second
 	m.SetupRetryAttempts = 1
 	_ = setupServer(m, map[string]string{
@@ -309,34 +313,41 @@ func TestSetupRetryFailure(t *testing.T) {
 		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
-	defer m.Close()
-	listener, err := net.Listen("tcp", ":7891") // block the debug port
+	listener, err := net.Listen("tcp", ":0") // block the debug port
+	defer listener.Close()
 	assert.NoError(t, err)
+	// parse the port the listener is listening on
+	matches := r.FindStringSubmatch(listener.Addr().String())
+	assert.NotEmpty(t, matches, "no ports matched the regexp")
 	_ = setupServer(m, map[string]string{
-		"POPS_DEBUGPORT":       "7891",
+		"POPS_DEBUGPORT":       matches[len(matches)-1],
 		"NUM_DRAINING_THREADS": "2",
 		"CHANNEL_SIZE":         "10",
 		"MAX_DRAIN_SIZE":       "50",
 	})
-	defer listener.Close()
-	assert.EqualError(t, m.setupServer(), "listen tcp :7891: bind: address already in use")
+	assert.EqualError(t, m.setupServer(), fmt.Sprintf("listen tcp :%s: bind: address already in use", matches[len(matches)-1]))
 }
 
 func TestMainSetupFailure(t *testing.T) {
+	r, regerr := regexp.Compile("([\\d\\w\\.\\[\\:+\\]]+:(\\d+))")
+	assert.NoError(t, regerr, "regex for test is not compiling")
 	m := NewServer()
-	m.SetupRetryDelay = time.Second
-	m.SetupRetryAttempts = 1
+	defer m.Close()
+	m.SetupRetryDelay = 0 * time.Second
+	m.SetupRetryAttempts = 0
+	listener, err := net.Listen("tcp", ":0") // block the debug port
+	defer listener.Close()
+	assert.NoError(t, err)
+	// parse the port the listener is listening on
+	matches := r.FindStringSubmatch(listener.Addr().String())
+	assert.NotEmpty(t, matches, "no ports matched the regexp")
 	_ = setupServer(m, map[string]string{
 		"NUM_DRAINING_THREADS": "2",
-		"CHANNEL_SIZE":         "10",
-		"MAX_DRAIN_SIZE":       "50",
+		"CHANNEL_SIZE":         "2",
+		"MAX_DRAIN_SIZE":       "2",
+		"POPS_DEBUGPORT":       matches[len(matches)-1],
 	})
-	defer m.Close()
-	listener, err := net.Listen("tcp", ":7891") // block the debug port
-	assert.NoError(t, err)
-	_ = setupServer(m, map[string]string{"POPS_DEBUGPORT": "7891"})
-	defer listener.Close()
-	assert.Panics(t, m.main)
+	assert.Panics(t, m.main, "main instance didn't panic")
 }
 
 func TestSbingestExpvar(t *testing.T) {
