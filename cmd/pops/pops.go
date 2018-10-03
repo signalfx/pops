@@ -102,7 +102,7 @@ type dataSinkConfig struct {
 func (c *dataSinkConfig) Load(conf *distconf.Distconf) {
 	c.DatapointEndpoint = conf.Str("DATA_SINK_DP_ENDPOINT", sfxclient.IngestEndpointV2)
 	c.EventEndpoint = conf.Str("DATA_SINK_EVENT_ENDPOINT", sfxclient.EventIngestEndpointV2)
-	c.TraceEndpoint = conf.Str("DATA_SINK_TRACE_ENDPOINTl", sfxclient.TraceIngestEndpointV1)
+	c.TraceEndpoint = conf.Str("DATA_SINK_TRACE_ENDPOINT", sfxclient.TraceIngestEndpointV1)
 	c.ShutdownTimeout = conf.Duration("DATA_SINK_SHUTDOWN_TIMEOUT", 3*time.Second)
 	c.NumChannels = conf.Int("NUM_CHANNELS", 50)
 	c.NumDrainingThreads = conf.Int("NUM_DRAINING_THREADS", 2)
