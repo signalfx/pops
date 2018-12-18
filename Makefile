@@ -1,4 +1,4 @@
-GO_VERSION = 1.11.0
+GO_VERSION = 1.11.3
 
 .PHONY: deafult
 default: build
