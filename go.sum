@@ -1,4 +1,4 @@
-github.com/apache/thrift v0.0.0-20180411174621-858809fad01d h1:nesDIWeEZOjHvYsyGRquuREjnrkNFtwQl9mRLoFXJDM=
+github.com/apache/thrift v0.0.0-20180411174621-858809fad01d h1:FpnuLmy9B8Zv224zDrjobOhrbyXVQDh9ER4BrrkRfvA=
 github.com/apache/thrift v0.0.0-20180411174621-858809fad01d/go.mod h1:cp2SuWMxlEZw2r+iP2GNCdIi4C1qmUzdZFSVb+bacwQ=
 github.com/davecgh/go-spew v0.0.0-20171005155431-ecdeabc65495 h1:6IyqGr3fnd0tM3YxipK27TUskaOVUjU2nG45yzwcQKY=
 github.com/davecgh/go-spew v0.0.0-20171005155431-ecdeabc65495/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
