@@ -56,6 +56,8 @@ type HTTPSink struct {
 	EventEndpoint      string
 	DatapointEndpoint  string
 	TraceEndpoint      string
+	AdditionalHeaders  map[string]string
+	ResponseCallback   func(resp *http.Response, responseBody []byte)
 	Client             *http.Client
 	protoMarshaler     func(pb proto.Message) ([]byte, error)
 	jsonMarshal        func(v []*trace.Span) ([]byte, error)
@@ -96,7 +98,9 @@ func (h *HTTPSink) handleResponse(resp *http.Response, respValidator responseVal
 			ResponseBody: string(respBody),
 		}
 	}
-
+	if h.ResponseCallback != nil {
+		h.ResponseCallback(resp, respBody)
+	}
 	return respValidator(respBody)
 }
 
@@ -119,6 +123,10 @@ func (h *HTTPSink) doBottom(ctx context.Context, f func() (io.Reader, bool, erro
 		return errors.Annotatef(err, "cannot parse new HTTP request to %s", endpoint)
 	}
 	req = req.WithContext(ctx)
+	for k, v := range h.AdditionalHeaders {
+		req.Header.Set(k, v)
+	}
+	// set these below so if someone accidentally uses the same as below we wil override appropriately
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set(TokenHeaderName, h.AuthToken)
 	req.Header.Set("User-Agent", h.UserAgent)
@@ -138,7 +146,7 @@ func (h *HTTPSink) doBottom(ctx context.Context, f func() (io.Reader, bool, erro
 
 // AddDatapoints forwards the datapoints to SignalFx.
 func (h *HTTPSink) AddDatapoints(ctx context.Context, points []*datapoint.Datapoint) (err error) {
-	if len(points) == 0 {
+	if len(points) == 0 || h.DatapointEndpoint == "" {
 		return nil
 	}
 	return h.doBottom(ctx, func() (io.Reader, bool, error) {
@@ -286,7 +294,7 @@ func (h *HTTPSink) coreDatapointToProtobuf(point *datapoint.Datapoint) *com_sign
 func (h *HTTPSink) getReader(b []byte) (io.Reader, bool, error) {
 	var err error
 	if !h.DisableCompression && len(b) > 1500 {
-		buf := new(bytes.Buffer)
+		buf := new(bytes.Buffer) // TODO use a pool for this too?
 		w := h.zippers.Get().(*gzip.Writer)
 		defer h.zippers.Put(w)
 		w.Reset(buf)
@@ -318,7 +326,7 @@ func (h *HTTPSink) encodePostBodyProtobufV2(datapoints []*datapoint.Datapoint) (
 
 // AddEvents forwards the events to SignalFx.
 func (h *HTTPSink) AddEvents(ctx context.Context, events []*event.Event) (err error) {
-	if len(events) == 0 {
+	if len(events) == 0 || h.EventEndpoint == "" {
 		return nil
 	}
 	return h.doBottom(ctx, func() (io.Reader, bool, error) {
@@ -386,7 +394,7 @@ func spanResponseValidator(respBody []byte) error {
 
 // AddSpans forwards the traces to SignalFx.
 func (h *HTTPSink) AddSpans(ctx context.Context, traces []*trace.Span) (err error) {
-	if len(traces) == 0 {
+	if len(traces) == 0 || h.TraceEndpoint == "" {
 		return nil
 	}
 	return h.doBottom(ctx, func() (io.Reader, bool, error) {
