@@ -1,4 +1,6 @@
 #! /bin/bash
+SCRIPTDIR=
+
 # generates the build information to populate the version metric
 BIN_NAME="POPS"
 
@@ -7,11 +9,11 @@ if [ -z  "$COMMIT_SHA" ]; then
 fi
 
 if [ -z  "$BIN_VERSION" ]; then
-  BIN_VERSION="1.0-SNAPSHOT"
+  BIN_VERSION=$(git describe --tag)
 fi
 
 if [ -z "$BUILDER" ]; then
-    BULIDER="Makefile"
+    BUILDER="Makefile"
 fi
 
 echo "{

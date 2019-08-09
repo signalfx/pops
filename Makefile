@@ -1,73 +1,102 @@
-GO_VERSION = 1.11.4
+GO_VERSION = 1.12
+GOLANGCI_LINT_VERSION=1.17.1
+
+# set goos by detecting environment
+# this is useful for cross compiling in linux container for local os
+ifeq ($(GOOS), "")
+	ifeq ($(OS), Windows_NT)
+		GOOS=windows
+	else
+		ifeq ($(shell uname -s),Linux)
+			GOOS=linux
+		else
+			GOOS=darwin
+		endif
+	endif
+endif
 
 .PHONY: deafult
 default: build
+
+.PHONY: install-gobuild
+install-gobuild:
+	go get github.com/jstemmer/go-junit-report
+	go get github.com/signalfx/gobuild
+
+.PHONY: install-golangci-lint
+install-golangci-lint:
+	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v$(GOLANGCI_LINT_VERSION)
+
+.PHONY: install-build-tools
+install-build-tools: install-gobuild install-golangci-lint
+#	# install tools used for building
+#	# we must explicitly turn on GO111MODULE to install packages with a version number
+#	# see: https://github.com/golang/go/issues/29415
 
 .PHONY: vendor
 vendor:
 	# vendors modules
 	docker run --rm -t \
-		-e GOOS=linux \
+		-e GOOS=$(GOOS) \
 		-e GO111MODULE=on \
 		-v $(CURDIR):/go/src/github.com/signalfx/pops \
 		-w /go/src/github.com/signalfx/pops \
-		golang:$(GO_VERSION) go mod vendor
+		golang:$(GO_VERSION) /bin/bash -c "go mod tidy; go mod vendor"
 
-.PHONY: install-build-tools
-install-build-tools:
-	# install tools used for building
-	# we want to install gobuild and gometalinter
-	# without adding them to this project's modules
-	# leave GO111MODULE off to avoid this
-	go get -u github.com/signalfx/gobuild
-	gobuild install
-	gometalinter --install
+.PHONY: test
+test:
+	GO111MODULE=on gobuild test
+
+.PHONY: test-in-container
+test-in-container:
+	docker run --rm -t \
+		-e GO111MODULE=on \
+		-v $(CURDIR):/go/src/github.com/signalfx/pops \
+        -w /go/src/github.com/signalfx/pops \
+        golang:$(GO_VERSION) /bin/bash -c "make install-gobuild; make test"
+
+.PHONY: lint
+lint:
+	golangci-lint run
+
+.PHONY: lint-in-container
+lint-in-container:
+	docker run --rm -t \
+		-v $(CURDIR):/go/src/github.com/signalfx/pops \
+		-w /go/src/github.com/signalfx/pops \
+		golang:$(GO_VERSION) /bin/bash -c "make install-golangci-lint; make lint"
 
 .PHONY: clean
 clean:
 	# remove previous output
-	rm -rf $(CURDIR)/output
+	rm -rf $(CURDIR)/output/*
 
-.PHONY: gobuild
-gobuild:
-	# run gobuild to do everything except build
-	#
-	# Leave GO111MODULE off becuase gometalinter and down stream
-	# linters do not adquately support modules yet...
-	# See: https://github.com/alecthomas/gometalinter/issues/562
-	gobuild list
-	gobuild lint
-	gobuild dupl
-	gobuild test
+.PHONY: build-info
+build-info:
+	# generate build info to be stored in the pops container
+	sh $(CURDIR)/scripts/buildInfo.sh
 
 .PHONY: build
 build: clean
-	# build to a target directory with cgo disabled
+	# build to a target directory
 	mkdir -p $(CURDIR)/output/$(GOOS)
 	# turn on GO111MODULE and set -mod flag to "vendor" to build using the vendored dependencies
-	GO111MODULE=on CGO_ENABLED=0 GOOS=$(GOOS) go build -mod=vendor -v -o $(CURDIR)/output/$(GOOS)/pops $(CURDIR)/cmd/pops/pops.go
+	GO111MODULE=on CGO_ENABLED=0 GOOS=$(GOOS) go build -mod=vendor -v -o $(CURDIR)/output/$(GOOS)/pops $(CURDIR)/cmd/pops.go
 	ls -la $(CURDIR)/output/$(GOOS)/
 
-.PHONY: with-container
-with-container:
+.PHONY: build-in-container
+build-in-container:
 	# run a go distributed docker container and build for the target os inside the container
-	# turn off GO111MODULE because most of gobuild and linters are not compatible
-	# This is ok, becuase we still vendor our dependencies with go mod
-	# so the linters can rely on the vendored deps
 	docker run --rm -t \
-		-e GOOS=linux \
-		-e GO111MODULE=off \
+		-e GOOS=$(GOOS) \
+		-e GO111MODULE=on \
 		-v $(CURDIR):/go/src/github.com/signalfx/pops \
 		-w /go/src/github.com/signalfx/pops \
-		golang:$(GO_VERSION) /bin/bash -c "set -e; make install-build-tools; make gobuild; make build"
-
-.PHONY: buildInfo
-buildInfo:
-	# generate build info to be stored in the pops container
-	sh $(CURDIR)/buildInfo.sh
+		golang:$(GO_VERSION) /bin/bash -c "set -e; make build"
 
 .PHONY: container
-container: buildInfo with-container
+container: clean
 	# build container for pops service
-	docker build --no-cache -f $(CURDIR)/Dockerfile -t quay.io/signalfx/pops:$(shell git describe --tags) .
+	docker build --no-cache -f $(CURDIR)/Dockerfile --build-arg GO_VERSION=$(GO_VERSION) --target=final -t quay.io/signalfx/pops:$(shell git describe --tag) .
+
 

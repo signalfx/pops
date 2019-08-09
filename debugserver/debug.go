@@ -23,7 +23,7 @@ func (c *Config) Load(d *distconf.Distconf) {
 	c.DebugPort = d.Int("POPS_DEBUGPORT", 6060).Get()
 }
 
-// DebugServer listens to a private debugging port to explose internal metrics for debug purposes
+// DebugServer listens to a private debugging port to expose internal metrics for debug purposes
 type DebugServer struct {
 	debugServer       *http.Server
 	debugHTTPListener net.Listener

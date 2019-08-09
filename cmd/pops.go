@@ -21,12 +21,13 @@ import (
 	"syscall"
 	"time"
 
-	"gopkg.in/natefinch/lumberjack.v2"
-
-	"github.com/signalfx/pops/cmd/debugserver"
+	"github.com/signalfx/pops/debugserver"
 
 	"github.com/gorilla/mux"
 	"github.com/signalfx/com_signalfx_metrics_protobuf"
+	"github.com/signalfx/gateway/protocol/collectd"
+	"github.com/signalfx/gateway/protocol/signalfx"
+	"github.com/signalfx/gateway/protocol/zipper"
 	"github.com/signalfx/golib/clientcfg"
 	"github.com/signalfx/golib/datapoint"
 	"github.com/signalfx/golib/datapoint/dpsink"
@@ -38,9 +39,7 @@ import (
 	"github.com/signalfx/golib/timekeeper"
 	"github.com/signalfx/golib/trace"
 	"github.com/signalfx/golib/web"
-	"github.com/signalfx/metricproxy/protocol/collectd"
-	"github.com/signalfx/metricproxy/protocol/signalfx"
-	"github.com/signalfx/metricproxy/protocol/zipper"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // stats are internal tracking stats about pops's core main server
@@ -289,7 +288,7 @@ func (m *Server) setupJSONDatapointV2(r *mux.Router, sink dpsink.Sink) []sfxclie
 	return []sfxclient.Collector{j2, zd}
 }
 
-func (m *Server) setupJSONEventV2(r *mux.Router, sink dpsink.Sink) sfxclient.Collector {
+func (m *Server) setupJSONEventV2(r *mux.Router, sink dpsink.ESink) sfxclient.Collector {
 	j2e := &signalfx.JSONEventDecoderV2{Sink: sink, Logger: m.sfxClientLogger}
 	ze := m.setupDatapointEndpoint(r, j2e, signalfx.SetupJSONV2EventPaths)
 	return ze
@@ -299,7 +298,7 @@ func (m *Server) setupDatapointProtobufV2(r *mux.Router, sink dpsink.Sink) sfxcl
 	return m.setupDatapointEndpoint(r, &signalfx.ProtobufDecoderV2{Sink: sink, Logger: m.sfxClientLogger}, signalfx.SetupProtobufV2DatapointPaths)
 }
 
-func (m *Server) setupEventProtobufV2(r *mux.Router, sink dpsink.Sink) sfxclient.Collector {
+func (m *Server) setupEventProtobufV2(r *mux.Router, sink dpsink.ESink) sfxclient.Collector {
 	return m.setupDatapointEndpoint(r, &signalfx.ProtobufEventDecoderV2{Sink: sink, Logger: m.sfxClientLogger}, signalfx.SetupProtobufV2EventPaths)
 }
 
@@ -480,7 +479,7 @@ func (m *Server) setupDataSink() (err error) {
 	)
 	m.dataSink.ShutdownTimeout = m.configs.dataSinkConfig.ShutdownTimeout.Get()
 	m.sfxclient.AddCallback(m.dataSink)
-	return
+	return err
 }
 
 // TODO refactor this with sbingest's setupHTTPServer maybe?
@@ -644,11 +643,10 @@ func (m *Server) setupSfxClient() error {
 	return nil
 }
 
-func (m *Server) setupConf() error {
+func (m *Server) setupConf() {
 	backs := make([]distconf.BackingLoader, 0, 1)
 	backs = append(backs, distconf.EnvLoader())
 	m.conf = distconf.FromLoaders(backs)
-	return nil
 }
 
 func (m *Server) setupServer() error {
@@ -824,7 +822,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	signal.Notify(MainServerInstance.signalChan, syscall.SIGTERM)
 	signal.Notify(MainServerInstance.signalChan, syscall.SIGINT)
-	_ = MainServerInstance.setupConf()
+	MainServerInstance.setupConf()
 	MainServerInstance.logger = log.NewContext(log.NewJSONLogger(getLogger(MainServerInstance.conf), MainServerInstance)).With(logkey.Time, log.DefaultTimestamp, logkey.Caller, log.DefaultCaller)
 	MainServerInstance.sfxClientLogger = log.NewOnePerSecond(MainServerInstance.logger)
 	MainServerInstance.main()

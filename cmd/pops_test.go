@@ -110,7 +110,8 @@ func TestSetupRetry(t *testing.T) {
 // type metadata int
 func TestMainFunction(_ *testing.T) {
 	_ = setupServer(MainServerInstance, map[string]string{
-		"LOG_DIR": "/tmp",
+		"POPS_PORT": "0",
+		"LOG_DIR":   "/tmp",
 	})
 	mainDoneChan := make(chan struct{})
 	go func() {
@@ -302,17 +303,11 @@ func TestMainFailSetup(t *testing.T) {
 }
 
 func TestSetupRetryFailure(t *testing.T) {
-	r, regerr := regexp.Compile("([\\d\\w\\.\\[\\:+\\]]+:(\\d+))")
-	assert.NoError(t, regerr, "regex for test is not compiling")
+	r := regexp.MustCompile(`([\d\w\.\[\:+\]]+:(\d+))`)
 	m := NewServer()
 	defer m.Close()
 	m.SetupRetryDelay = time.Second
 	m.SetupRetryAttempts = 1
-	_ = setupServer(m, map[string]string{
-		"NUM_DRAINING_THREADS": "2",
-		"CHANNEL_SIZE":         "10",
-		"MAX_DRAIN_SIZE":       "50",
-	})
 	listener, err := net.Listen("tcp", ":0") // block the debug port
 	defer listener.Close()
 	assert.NoError(t, err)
@@ -320,6 +315,7 @@ func TestSetupRetryFailure(t *testing.T) {
 	matches := r.FindStringSubmatch(listener.Addr().String())
 	assert.NotEmpty(t, matches, "no ports matched the regexp")
 	_ = setupServer(m, map[string]string{
+		"POPS_PORT":            "0",
 		"POPS_DEBUGPORT":       matches[len(matches)-1],
 		"NUM_DRAINING_THREADS": "2",
 		"CHANNEL_SIZE":         "10",
@@ -329,8 +325,7 @@ func TestSetupRetryFailure(t *testing.T) {
 }
 
 func TestMainSetupFailure(t *testing.T) {
-	r, regerr := regexp.Compile("([\\d\\w\\.\\[\\:+\\]]+:(\\d+))")
-	assert.NoError(t, regerr, "regex for test is not compiling")
+	r := regexp.MustCompile(`([\d\w\.\[\:+\]]+:(\d+))`)
 	m := NewServer()
 	defer m.Close()
 	m.SetupRetryDelay = 0 * time.Second
