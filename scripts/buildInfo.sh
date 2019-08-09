@@ -1,5 +1,4 @@
 #! /bin/bash
-SCRIPTDIR=
 
 # generates the build information to populate the version metric
 BIN_NAME="POPS"
