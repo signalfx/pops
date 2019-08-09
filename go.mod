@@ -26,6 +26,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.9.1 // indirect
 	github.com/jaegertracing/jaeger v0.0.0-20180823183057-afefdf1a41e5 // indirect
 	github.com/jonboulle/clockwork v0.1.0 // indirect
+	github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024 // indirect
 	github.com/juju/errors v0.0.0-20190207033735-e65537c515d7 // indirect
 	github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8 // indirect
 	github.com/juju/testing v0.0.0-20190613124551-e81189438503 // indirect
@@ -35,10 +36,11 @@ require (
 	github.com/prometheus/client_golang v0.9.4 // indirect
 	github.com/samuel/go-zookeeper v0.0.0-20171027001500-9a96098268ef // indirect
 	github.com/signalfx/com_signalfx_metrics_protobuf v0.0.0-20170330202426-93e507b42f43
-	github.com/signalfx/gateway v1.2.1
+	github.com/signalfx/gateway v1.2.8
+	github.com/signalfx/gobuild v0.0.0-20171013201037-4abf7c615b64 // indirect
 	github.com/signalfx/gohelpers v0.0.0-20151202220853-ac9f0e053f15 // indirect
 	github.com/signalfx/gohistogram v0.0.0-20160107210732-1ccfd2ff5083 // indirect
-	github.com/signalfx/golib v2.3.4+incompatible
+	github.com/signalfx/golib v2.4.0+incompatible
 	github.com/smartystreets/assertions v1.0.0 // indirect
 	github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
 	github.com/soheilhy/cmux v0.1.4 // indirect
@@ -58,7 +60,6 @@ require (
 	go.uber.org/zap v1.10.0 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
 	google.golang.org/grpc v1.21.1 // indirect
-	gopkg.in/logfmt.v0 v0.3.0 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0-20170531160350-a96e63847dc3
 	gopkg.in/yaml.v2 v2.2.2 // indirect
