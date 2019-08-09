@@ -25,7 +25,7 @@ install-gobuild:
 
 .PHONY: install-golangci-lint
 install-golangci-lint:
-	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v$(GOLANGCI_LINT_VERSION)
+	curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin v${GOLANGCI_LINT_VERSION}
 
 .PHONY: install-build-tools
 install-build-tools: install-gobuild install-golangci-lint
