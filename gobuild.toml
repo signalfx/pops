@@ -1,5 +1,5 @@
 [vars]
-  ignoreDirs = [".git", "_example", "vendor", "scripts", ".idea", "output"]
+  ignoreDirs = [".circleci", ".git", ".idea", "_example", "output", "scripts", "vendor"]
   testFlags = ["-mod", "vendor", "-covermode", "atomic", "-race", "-timeout", "120s", "-cpu", "4", "-parallel", "8"]
   duplLimit = "300"
   testCoverage = 100.0
