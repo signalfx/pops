@@ -1,12 +1,13 @@
 run:
-  concurrency: 4
-  deadline: 1m
+  concurrency: 6
+  deadline: 10m
   skip-dirs:
     - .circleci
     - .git
     - .idea
     - output
     - vendor
+    - scripts
 
 linters:
   enable-all: true
