@@ -445,6 +445,19 @@ func (m *Server) setupHealthCheck(r *mux.Router) {
 	r.Path("/healthz").Handler(handler)
 }
 
+func makeHTTPClientFunc(numChannels, numDrainingThreads int64) func() *http.Client {
+    transport := http.DefaultTransport.(*http.Transport).Clone()
+    maxConnections := int(numChannels * numDrainingThreads)
+    transport.MaxIdleConns = maxConnections
+    transport.MaxIdleConnsPerHost = maxConnections
+    return func() *http.Client {
+        return &http.Client{
+            Timeout : sfxclient.DefaultTimeout,
+            Transport: transport,
+        }
+    }
+}
+
 // setupDataSink sets up the sink for Pops with a DatapointEndpoint and EventEndpoint
 func (m *Server) setupDataSink() (err error) {
 	numChannels := m.configs.dataSinkConfig.NumChannels.Get()
@@ -473,7 +486,7 @@ func (m *Server) setupDataSink() (err error) {
 		eventEndpoint,
 		traceEndpoint,
 		"",
-		nil,
+		makeHTTPClientFunc(numChannels, numDrainingThreads),
 		m.defaultDataSinkErrorHandler,
 		maxRetry,
 	)
