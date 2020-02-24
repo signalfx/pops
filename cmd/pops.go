@@ -448,7 +448,7 @@ func (m *Server) setupHealthCheck(r *mux.Router) {
 func makeHTTPClientFunc(numChannels, numDrainingThreads int64) func() *http.Client {
 	maxConnections := int(numChannels * numDrainingThreads)
 	// Create a new transport with the defaults and update idle connection settings
-	// Once POPS is ugpraded to use go 1.13 we can use DefaultTransport.Clone and just overrirde
+	// Once POPS is upgraded to use go 1.13 we can use DefaultTransport.Clone and just overrirde
 	// maxIdleConns and MaxIdleConnsPerHost
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
