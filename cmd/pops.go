@@ -446,16 +446,30 @@ func (m *Server) setupHealthCheck(r *mux.Router) {
 }
 
 func makeHTTPClientFunc(numChannels, numDrainingThreads int64) func() *http.Client {
-    transport := http.DefaultTransport.(*http.Transport).Clone()
-    maxConnections := int(numChannels * numDrainingThreads)
-    transport.MaxIdleConns = maxConnections
-    transport.MaxIdleConnsPerHost = maxConnections
-    return func() *http.Client {
-        return &http.Client{
-            Timeout : sfxclient.DefaultTimeout,
-            Transport: transport,
-        }
-    }
+	maxConnections := int(numChannels * numDrainingThreads)
+	// Create a new transport with the defaults and update idle connection settings
+	// Once POPS is ugpraded to use go 1.13 we can use DefaultTransport.Clone and just overrirde
+	// maxIdleConns and MaxIdleConnsPerHost
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		MaxIdleConns:          maxConnections,
+		MaxIdleConnsPerHost:   maxConnections,
+	}
+	return func() *http.Client {
+		return &http.Client{
+			Timeout:   sfxclient.DefaultTimeout,
+			Transport: transport,
+		}
+	}
 }
 
 // setupDataSink sets up the sink for Pops with a DatapointEndpoint and EventEndpoint
