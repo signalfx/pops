@@ -34,7 +34,7 @@ import (
 	"github.com/uber/tchannel-go/tnet"
 
 	"github.com/opentracing/opentracing-go"
-	"github.com/uber-go/atomic"
+	"go.uber.org/atomic"
 	"golang.org/x/net/context"
 )
 
@@ -113,6 +113,10 @@ type ChannelOptions struct {
 	// Handler is an alternate handler for all inbound requests, overriding the
 	// default handler that delegates to a subchannel.
 	Handler Handler
+
+	// Dialer is optional factory method which can be used for overriding
+	// outbound connections for things like TLS handshake
+	Dialer func(ctx context.Context, network, hostPort string) (net.Conn, error)
 }
 
 // ChannelState is the state of a channel.
@@ -155,8 +159,11 @@ type Channel struct {
 	relayHost           RelayHost
 	relayMaxTimeout     time.Duration
 	relayTimerVerify    bool
+	internalHandlers    *handlerMap
 	handler             Handler
 	onPeerStatusChanged func(*Peer)
+	dialer              func(ctx context.Context, hostPort string) (net.Conn, error)
+	closed              chan struct{}
 
 	// mutable contains all the members of Channel which are mutable.
 	mutable struct {
@@ -242,6 +249,14 @@ func NewChannel(serviceName string, opts *ChannelOptions) (*Channel, error) {
 		return nil, err
 	}
 
+	// Default to dialContext if dialer is not passed in as an option
+	dialCtx := dialContext
+	if opts.Dialer != nil {
+		dialCtx = func(ctx context.Context, hostPort string) (net.Conn, error) {
+			return opts.Dialer(ctx, "tcp", hostPort)
+		}
+	}
+
 	ch := &Channel{
 		channelConnectionCommon: channelConnectionCommon{
 			log:           logger,
@@ -257,6 +272,8 @@ func NewChannel(serviceName string, opts *ChannelOptions) (*Channel, error) {
 		relayHost:         opts.RelayHost,
 		relayMaxTimeout:   validateRelayMaxTimeout(opts.RelayMaxTimeout, logger),
 		relayTimerVerify:  opts.RelayTimerVerification,
+		dialer:            dialCtx,
+		closed:            make(chan struct{}),
 	}
 	ch.peers = newRootPeerList(ch, opts.OnPeerStatusChanged).newChild()
 
@@ -282,12 +299,7 @@ func NewChannel(serviceName string, opts *ChannelOptions) (*Channel, error) {
 	ch.mutable.state = ChannelClient
 	ch.mutable.conns = make(map[uint32]*Connection)
 	ch.createCommonStats()
-
-	// Register internal unless the root handler has been overridden, since
-	// Register will panic.
-	if opts.Handler == nil {
-		ch.registerInternal()
-	}
+	ch.internalHandlers = ch.createInternalHandlers()
 
 	registerNewChannel(ch)
 
@@ -565,7 +577,7 @@ func (ch *Channel) Connect(ctx context.Context, hostPort string) (*Connection, e
 	}
 
 	timeout := getTimeout(ctx)
-	tcpConn, err := dialContext(ctx, hostPort)
+	tcpConn, err := ch.dialer(ctx, hostPort)
 	if err != nil {
 		if ne, ok := err.(net.Error); ok && ne.Timeout() {
 			ch.log.WithFields(
@@ -758,12 +770,20 @@ func (ch *Channel) connectionCloseStateChange(c *Connection) {
 
 func (ch *Channel) onClosed() {
 	removeClosedChannel(ch)
+
+	close(ch.closed)
 	ch.log.Infof("Channel closed.")
 }
 
 // Closed returns whether this channel has been closed with .Close()
 func (ch *Channel) Closed() bool {
 	return ch.State() == ChannelClosed
+}
+
+// ClosedChan returns a channel that will close when the Channel has completely
+// closed.
+func (ch *Channel) ClosedChan() <-chan struct{} {
+	return ch.closed
 }
 
 // State returns the current channel state.
@@ -784,24 +804,31 @@ func (ch *Channel) Close() {
 	var connections []*Connection
 	var channelClosed bool
 
-	ch.mutable.Lock()
+	func() {
+		ch.mutable.Lock()
+		defer ch.mutable.Unlock()
 
-	if ch.mutable.l != nil {
-		ch.mutable.l.Close()
-	}
+		if ch.mutable.state == ChannelClosed {
+			ch.Logger().Info("Channel already closed, skipping additional Close() calls")
+			return
+		}
 
-	// Stop the idle connections timer.
-	ch.mutable.idleSweep.Stop()
+		if ch.mutable.l != nil {
+			ch.mutable.l.Close()
+		}
 
-	ch.mutable.state = ChannelStartClose
-	if len(ch.mutable.conns) == 0 {
-		ch.mutable.state = ChannelClosed
-		channelClosed = true
-	}
-	for _, c := range ch.mutable.conns {
-		connections = append(connections, c)
-	}
-	ch.mutable.Unlock()
+		// Stop the idle connections timer.
+		ch.mutable.idleSweep.Stop()
+
+		ch.mutable.state = ChannelStartClose
+		if len(ch.mutable.conns) == 0 {
+			ch.mutable.state = ChannelClosed
+			channelClosed = true
+		}
+		for _, c := range ch.mutable.conns {
+			connections = append(connections, c)
+		}
+	}()
 
 	for _, c := range connections {
 		c.close(LogField{"reason", "channel closing"})

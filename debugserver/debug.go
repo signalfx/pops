@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/signalfx/golib/distconf"
-	"github.com/signalfx/golib/explorable"
-	"github.com/signalfx/golib/expvar2"
+	"github.com/signalfx/golib/v3/distconf"
+	"github.com/signalfx/golib/v3/explorable"
+	"github.com/signalfx/golib/v3/expvar2"
 )
 
 // Config configures what port the debug server listens to

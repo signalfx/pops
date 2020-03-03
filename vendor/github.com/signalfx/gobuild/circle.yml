@@ -1,0 +1,10 @@
+dependencies:
+  cache_directories:
+    - ~/gover
+    - ~/installed_gotools
+  override:
+    - ./circle.sh cache
+
+test:
+  override:
+    - ./circle.sh test

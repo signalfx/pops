@@ -16,11 +16,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/signalfx/golib/clientcfg"
-	"github.com/signalfx/golib/distconf"
-	"github.com/signalfx/golib/log"
-	"github.com/signalfx/golib/sfxclient"
-	"github.com/signalfx/golib/timekeeper/timekeepertest"
+	"github.com/signalfx/golib/v3/clientcfg"
+	"github.com/signalfx/golib/v3/distconf"
+	"github.com/signalfx/golib/v3/log"
+	"github.com/signalfx/golib/v3/sfxclient"
+	"github.com/signalfx/golib/v3/timekeeper/timekeepertest"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -309,7 +309,9 @@ func TestSetupRetryFailure(t *testing.T) {
 	m.SetupRetryDelay = time.Second
 	m.SetupRetryAttempts = 1
 	listener, err := net.Listen("tcp", ":0") // block the debug port
-	defer listener.Close()
+	defer func() {
+		listener.Close()
+	}()
 	assert.NoError(t, err)
 	// parse the port the listener is listening on
 	matches := r.FindStringSubmatch(listener.Addr().String())
@@ -331,7 +333,10 @@ func TestMainSetupFailure(t *testing.T) {
 	m.SetupRetryDelay = 0 * time.Second
 	m.SetupRetryAttempts = 0
 	listener, err := net.Listen("tcp", ":0") // block the debug port
-	defer listener.Close()
+	defer func() {
+		// resolves a lint error about checking the return value
+		listener.Close()
+	}()
 	assert.NoError(t, err)
 	// parse the port the listener is listening on
 	matches := r.FindStringSubmatch(listener.Addr().String())

@@ -1,0 +1,13 @@
+[vars]
+  ignoreDirs = [".git", "_example", "internal"]
+  testCoverage = 1.0
+
+[metalinter]
+  [metalinter.enabled]
+    golint = true
+    gofmt = true
+    varcheck = true
+    aligncheck = true
+    gocyclo = true
+    vet = true
+    deadcode = true
