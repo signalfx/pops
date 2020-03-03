@@ -309,7 +309,9 @@ func TestSetupRetryFailure(t *testing.T) {
 	m.SetupRetryDelay = time.Second
 	m.SetupRetryAttempts = 1
 	listener, err := net.Listen("tcp", ":0") // block the debug port
-	defer listener.Close()
+	defer func() {
+		listener.Close()
+	}()
 	assert.NoError(t, err)
 	// parse the port the listener is listening on
 	matches := r.FindStringSubmatch(listener.Addr().String())
@@ -331,7 +333,10 @@ func TestMainSetupFailure(t *testing.T) {
 	m.SetupRetryDelay = 0 * time.Second
 	m.SetupRetryAttempts = 0
 	listener, err := net.Listen("tcp", ":0") // block the debug port
-	defer listener.Close()
+	defer func() {
+		// resolves a lint error about checking the return value
+		listener.Close()
+	}()
 	assert.NoError(t, err)
 	// parse the port the listener is listening on
 	matches := r.FindStringSubmatch(listener.Addr().String())

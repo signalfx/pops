@@ -1,5 +1,5 @@
 GO_VERSION = 1.12
-GOLANGCI_LINT_VERSION=1.17.1
+GOLANGCI_LINT_VERSION=1.23.7
 
 # set goos by detecting environment
 # this is useful for cross compiling in linux container for local os
