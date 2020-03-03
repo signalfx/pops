@@ -63,12 +63,6 @@ func (c *Connection) handleCallReq(frame *Frame) bool {
 	call.conn = c
 	ctx, cancel := newIncomingContext(call, callReq.TimeToLive)
 
-	if !c.pendingExchangeMethodAdd() {
-		// Connection is closed, no need to do anything.
-		return true
-	}
-	defer c.pendingExchangeMethodDone()
-
 	mex, err := c.inbound.newExchange(ctx, c.opts.FramePool, callReq.messageType(), frame.Header.ID, mexChannelBufferSize)
 	if err != nil {
 		if err == errDuplicateMex {
@@ -197,6 +191,15 @@ func (c *Connection) dispatchInbound(_ uint32, _ uint32, call *InboundCall, fram
 		}
 	}()
 
+	// Internal handlers (e.g., introspection) trump all other user-registered handlers on
+	// the "tchannel" name.
+	if call.ServiceName() == "tchannel" {
+		if h := c.internalHandlers.find(call.Method()); h != nil {
+			h.Handle(call.mex.ctx, call)
+			return
+		}
+	}
+
 	c.handler.Handle(call.mex.ctx, call)
 }
 
@@ -267,7 +270,7 @@ func (call *InboundCall) RemotePeer() PeerInfo {
 // CallOptions returns a CallOptions struct suitable for forwarding a request.
 func (call *InboundCall) CallOptions() *CallOptions {
 	return &CallOptions{
-		callerName:      call.CallerName(),
+		CallerName:      call.CallerName(),
 		Format:          call.Format(),
 		ShardKey:        call.ShardKey(),
 		RoutingDelegate: call.RoutingDelegate(),

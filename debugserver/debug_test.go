@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/signalfx/golib/distconf"
+	"github.com/signalfx/golib/v3/distconf"
 	"github.com/stretchr/testify/assert"
 )
 

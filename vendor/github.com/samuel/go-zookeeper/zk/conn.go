@@ -101,8 +101,12 @@ type Conn struct {
 	reconnectLatch   chan struct{}
 	setWatchLimit    int
 	setWatchCallback func([]*setWatchesRequest)
+	// Debug (for recurring re-auth hang)
+	debugCloseRecvLoop bool
+	debugReauthDone    chan struct{}
 
-	logger Logger
+	logger  Logger
+	logInfo bool // true if information messages are logged; false if only errors are logged
 
 	buf []byte
 }
@@ -200,6 +204,7 @@ func Connect(servers []string, sessionTimeout time.Duration, options ...connOpti
 		watchers:       make(map[watchPathType][]chan Event),
 		passwd:         emptyPassword,
 		logger:         DefaultLogger,
+		logInfo:        true, // default is true for backwards compatability
 		buf:            make([]byte, bufferSize),
 	}
 
@@ -234,6 +239,21 @@ func WithDialer(dialer Dialer) connOption {
 func WithHostProvider(hostProvider HostProvider) connOption {
 	return func(c *Conn) {
 		c.hostProvider = hostProvider
+	}
+}
+
+// WithLogger returns a connection option specifying a non-default Logger
+func WithLogger(logger Logger) connOption {
+	return func(c *Conn) {
+		c.logger = logger
+	}
+}
+
+// WithLogInfo returns a connection option specifying whether or not information messages
+// shoud be logged.
+func WithLogInfo(logInfo bool) connOption {
+	return func(c *Conn) {
+		c.logInfo = logInfo
 	}
 }
 
@@ -284,9 +304,9 @@ func WithMaxBufferSize(maxBufferSize int) connOption {
 // to a limit of 1mb. This option should be used for non-standard server setup
 // where znode is bigger than default 1mb.
 func WithMaxConnBufferSize(maxBufferSize int) connOption {
-       return func(c *Conn) {
-               c.buf = make([]byte, maxBufferSize)
-       }
+	return func(c *Conn) {
+		c.buf = make([]byte, maxBufferSize)
+	}
 }
 
 func (c *Conn) Close() {
@@ -361,7 +381,9 @@ func (c *Conn) connect() error {
 		if err == nil {
 			c.conn = zkConn
 			c.setState(StateConnected)
-			c.logger.Printf("Connected to %s", c.Server())
+			if c.logInfo {
+				c.logger.Printf("Connected to %s", c.Server())
+			}
 			return nil
 		}
 
@@ -370,15 +392,30 @@ func (c *Conn) connect() error {
 }
 
 func (c *Conn) resendZkAuth(reauthReadyChan chan struct{}) {
+	shouldCancel := func() bool {
+		select {
+		case <-c.shouldQuit:
+			return true
+		case <-c.closeChan:
+			return true
+		default:
+			return false
+		}
+	}
+
 	c.credsMu.Lock()
 	defer c.credsMu.Unlock()
 
 	defer close(reauthReadyChan)
 
-	c.logger.Printf("Re-submitting `%d` credentials after reconnect",
-		len(c.creds))
+	if c.logInfo {
+		c.logger.Printf("re-submitting `%d` credentials after reconnect", len(c.creds))
+	}
 
 	for _, cred := range c.creds {
+		if shouldCancel() {
+			return
+		}
 		resChan, err := c.sendRequest(
 			opSetAuth,
 			&setAuthRequest{Type: 0,
@@ -389,14 +426,23 @@ func (c *Conn) resendZkAuth(reauthReadyChan chan struct{}) {
 			nil)
 
 		if err != nil {
-			c.logger.Printf("Call to sendRequest failed during credential resubmit: %s", err)
+			c.logger.Printf("call to sendRequest failed during credential resubmit: %s", err)
 			// FIXME(prozlach): lets ignore errors for now
 			continue
 		}
 
-		res := <-resChan
+		var res response
+		select {
+		case res = <-resChan:
+		case <-c.closeChan:
+			c.logger.Printf("recv closed, cancel re-submitting credentials")
+			return
+		case <-c.shouldQuit:
+			c.logger.Printf("should quit, cancel re-submitting credentials")
+			return
+		}
 		if res.err != nil {
-			c.logger.Printf("Credential re-submit failed: %s", res.err)
+			c.logger.Printf("credential re-submit failed: %s", res.err)
 			// FIXME(prozlach): lets ignore errors for now
 			continue
 		}
@@ -438,13 +484,15 @@ func (c *Conn) loop() {
 		err := c.authenticate()
 		switch {
 		case err == ErrSessionExpired:
-			c.logger.Printf("Authentication failed: %s", err)
+			c.logger.Printf("authentication failed: %s", err)
 			c.invalidateWatches(err)
 		case err != nil && c.conn != nil:
-			c.logger.Printf("Authentication failed: %s", err)
+			c.logger.Printf("authentication failed: %s", err)
 			c.conn.Close()
 		case err == nil:
-			c.logger.Printf("Authenticated: id=%d, timeout=%d", c.SessionID(), c.sessionTimeoutMs)
+			if c.logInfo {
+				c.logger.Printf("authenticated: id=%d, timeout=%d", c.SessionID(), c.sessionTimeoutMs)
+			}
 			c.hostProvider.Connected()        // mark success
 			c.closeChan = make(chan struct{}) // channel to tell send loop stop
 			reauthChan := make(chan struct{}) // channel to tell send loop that authdata has been resubmitted
@@ -453,16 +501,28 @@ func (c *Conn) loop() {
 			wg.Add(1)
 			go func() {
 				<-reauthChan
+				if c.debugCloseRecvLoop {
+					close(c.debugReauthDone)
+				}
 				err := c.sendLoop()
-				c.logger.Printf("Send loop terminated: err=%v", err)
+				if err != nil || c.logInfo {
+					c.logger.Printf("send loop terminated: err=%v", err)
+				}
 				c.conn.Close() // causes recv loop to EOF/exit
 				wg.Done()
 			}()
 
 			wg.Add(1)
 			go func() {
-				err := c.recvLoop(c.conn)
-				c.logger.Printf("Recv loop terminated: err=%v", err)
+				var err error
+				if c.debugCloseRecvLoop {
+					err = errors.New("DEBUG: close recv loop")
+				} else {
+					err = c.recvLoop(c.conn)
+				}
+				if err != io.EOF || c.logInfo {
+					c.logger.Printf("recv loop terminated: err=%v", err)
+				}
 				if err == nil {
 					panic("zk: recvLoop should never return nil error")
 				}
@@ -761,10 +821,12 @@ func (c *Conn) recvLoop(conn net.Conn) error {
 	buf := make([]byte, sz)
 	for {
 		// package length
-		conn.SetReadDeadline(time.Now().Add(c.recvTimeout))
+		if err := conn.SetReadDeadline(time.Now().Add(c.recvTimeout)); err != nil {
+			c.logger.Printf("failed to set connection deadline: %v", err)
+		}
 		_, err := io.ReadFull(conn, buf[:4])
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to read from connection: %v", err)
 		}
 
 		blen := int(binary.BigEndian.Uint32(buf[:4]))
@@ -1156,6 +1218,38 @@ func (c *Conn) Multi(ops ...interface{}) ([]MultiResponse, error) {
 		mr[i] = MultiResponse{Stat: op.Stat, String: op.String, Error: op.Err.toError()}
 	}
 	return mr, err
+}
+
+// IncrementalReconfig is the zookeeper reconfiguration api that allows adding and removing servers
+// by lists of members.
+// Return the new configuration stats.
+func (c *Conn) IncrementalReconfig(joining, leaving []string, version int64) (*Stat, error) {
+	// TODO: validate the shape of the member string to give early feedback.
+	request := &reconfigRequest{
+		JoiningServers: []byte(strings.Join(joining, ",")),
+		LeavingServers: []byte(strings.Join(leaving, ",")),
+		CurConfigId:    version,
+	}
+
+	return c.internalReconfig(request)
+}
+
+// Reconfig is the non-incremental update functionality for Zookeeper where the list preovided
+// is the entire new member list.
+// the optional version allows for conditional reconfigurations, -1 ignores the condition.
+func (c *Conn) Reconfig(members []string, version int64) (*Stat, error) {
+	request := &reconfigRequest{
+		NewMembers:  []byte(strings.Join(members, ",")),
+		CurConfigId: version,
+	}
+
+	return c.internalReconfig(request)
+}
+
+func (c *Conn) internalReconfig(request *reconfigRequest) (*Stat, error) {
+	response := &reconfigReponse{}
+	_, err := c.request(opReconfig, request, response, nil)
+	return &response.Stat, err
 }
 
 // Server returns the current or last-connected server name.

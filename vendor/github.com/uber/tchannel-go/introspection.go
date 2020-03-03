@@ -22,6 +22,7 @@ package tchannel
 
 import (
 	"encoding/json"
+	"fmt"
 	"runtime"
 	"sort"
 	"strconv"
@@ -383,14 +384,14 @@ func (r *Relayer) IntrospectState(opts *IntrospectionOptions) RelayerRuntimeStat
 
 // IntrospectState returns the runtime state for this relayItems.
 func (ri *relayItems) IntrospectState(opts *IntrospectionOptions, name string) RelayItemSetState {
-	ri.RLock()
-	defer ri.RUnlock()
-
 	setState := RelayItemSetState{
 		Name:  name,
 		Count: ri.Count(),
 	}
 	if opts.IncludeExchanges {
+		ri.RLock()
+		defer ri.RUnlock()
+
 		setState.Items = make(map[string]RelayItemState, len(ri.items))
 		for k, v := range ri.items {
 			if !opts.IncludeTombstones && v.tomb {
@@ -400,7 +401,7 @@ func (ri *relayItems) IntrospectState(opts *IntrospectionOptions, name string) R
 				ID:                      k,
 				RemapID:                 v.remapID,
 				DestinationConnectionID: v.destination.conn.connID,
-				Tomb: v.tomb,
+				Tomb:                    v.tomb,
 			}
 			setState.Items[strconv.Itoa(int(k))] = state
 		}
@@ -446,9 +447,25 @@ func getStacks(all bool) []byte {
 	return buf
 }
 func (ch *Channel) handleIntrospection(arg3 []byte) interface{} {
-	var opts IntrospectionOptions
+	var opts struct {
+		IntrospectionOptions
+
+		// (optional) ID of the channel to introspection. If unspecified, uses ch.
+		ChannelID *uint32 `json:"id"`
+	}
 	json.Unmarshal(arg3, &opts)
-	return ch.IntrospectState(&opts)
+
+	if opts.ChannelID != nil {
+		id := *opts.ChannelID
+
+		var ok bool
+		ch, ok = findChannelByID(id)
+		if !ok {
+			return map[string]string{"error": fmt.Sprintf(`failed to find channel with "id": %v`, id)}
+		}
+	}
+
+	return ch.IntrospectState(&opts.IntrospectionOptions)
 }
 
 // IntrospectList returns the list of peers (hostport, score) in this peer list.
@@ -502,7 +519,9 @@ func introspectRuntimeVersion() RuntimeVersion {
 // registerInternal registers the following internal handlers which return runtime state:
 //  _gometa_introspect: TChannel internal state.
 //  _gometa_runtime: Golang runtime stats.
-func (ch *Channel) registerInternal() {
+func (ch *Channel) createInternalHandlers() *handlerMap {
+	internalHandlers := &handlerMap{}
+
 	endpoints := []struct {
 		name    string
 		handler func([]byte) interface{}
@@ -511,7 +530,6 @@ func (ch *Channel) registerInternal() {
 		{"_gometa_runtime", handleInternalRuntime},
 	}
 
-	tchanSC := ch.GetSubChannel("tchannel")
 	for _, ep := range endpoints {
 		// We need ep in our closure.
 		ep := ep
@@ -528,7 +546,13 @@ func (ch *Channel) registerInternal() {
 			}
 			NewArgWriter(call.Response().Arg3Writer()).WriteJSON(ep.handler(arg3))
 		}
-		ch.Register(HandlerFunc(handler), ep.name)
-		tchanSC.Register(HandlerFunc(handler), ep.name)
+
+		h := HandlerFunc(handler)
+		internalHandlers.register(h, ep.name)
+
+		// Register under the service name of channel as well (for backwards compatibility).
+		ch.GetSubChannel(ch.PeerInfo().ServiceName).Register(h, ep.name)
 	}
+
+	return internalHandlers
 }

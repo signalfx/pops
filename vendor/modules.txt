@@ -1,12 +1,25 @@
 # github.com/apache/thrift v0.0.0-20180411174621-858809fad01d
 github.com/apache/thrift/lib/go/thrift
-# github.com/coreos/etcd v3.3.13+incompatible
-github.com/coreos/etcd/clientv3
+# github.com/coreos/etcd v3.3.18+incompatible
 github.com/coreos/etcd/auth/authpb
+github.com/coreos/etcd/clientv3
+github.com/coreos/etcd/clientv3/balancer
+github.com/coreos/etcd/clientv3/balancer/connectivity
+github.com/coreos/etcd/clientv3/balancer/picker
+github.com/coreos/etcd/clientv3/balancer/resolver/endpoint
+github.com/coreos/etcd/clientv3/credentials
 github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes
 github.com/coreos/etcd/etcdserver/etcdserverpb
 github.com/coreos/etcd/mvcc/mvccpb
+github.com/coreos/etcd/pkg/logutil
+github.com/coreos/etcd/pkg/systemd
 github.com/coreos/etcd/pkg/types
+github.com/coreos/etcd/raft
+github.com/coreos/etcd/raft/raftpb
+# github.com/coreos/go-systemd v0.0.0-20190212144455-93d5ec2c7f76
+github.com/coreos/go-systemd/journal
+# github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f
+github.com/coreos/pkg/capnslog
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/go-logfmt/logfmt v0.4.0
@@ -16,149 +29,200 @@ github.com/go-stack/stack
 # github.com/gobwas/glob v0.2.3
 github.com/gobwas/glob
 github.com/gobwas/glob/compiler
-github.com/gobwas/glob/syntax
 github.com/gobwas/glob/match
+github.com/gobwas/glob/syntax
 github.com/gobwas/glob/syntax/ast
-github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/syntax/lexer
+github.com/gobwas/glob/util/runes
 github.com/gobwas/glob/util/strings
-# github.com/gogo/protobuf v1.2.1
+# github.com/gogo/googleapis v1.3.1
+github.com/gogo/googleapis/google/api
+# github.com/gogo/protobuf v1.3.1
 github.com/gogo/protobuf/gogoproto
+github.com/gogo/protobuf/jsonpb
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/protoc-gen-gogo/descriptor
-# github.com/golang/protobuf v1.3.1
+github.com/gogo/protobuf/sortkeys
+github.com/gogo/protobuf/types
+# github.com/golang/protobuf v1.3.4
+## explicit
 github.com/golang/protobuf/proto
+github.com/golang/protobuf/protoc-gen-go/descriptor
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1
+# github.com/google/uuid v1.1.1
+github.com/google/uuid
+# github.com/gopherjs/gopherjs v0.0.0-20200217142428-fce0ec30dd00
+## explicit
 github.com/gopherjs/gopherjs/js
-# github.com/gorilla/context v1.1.1
-github.com/gorilla/context
-# github.com/gorilla/mux v1.6.0
+# github.com/gorilla/mux v1.7.3
+## explicit
 github.com/gorilla/mux
-# github.com/jaegertracing/jaeger v0.0.0-20180823183057-afefdf1a41e5
+# github.com/grpc-ecosystem/grpc-gateway v1.7.0
+github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options
+# github.com/jaegertracing/jaeger v1.16.0
+github.com/jaegertracing/jaeger/model
+github.com/jaegertracing/jaeger/model/converter/thrift/jaeger
+github.com/jaegertracing/jaeger/proto-gen/api_v2
 github.com/jaegertracing/jaeger/thrift-gen/jaeger
+github.com/jaegertracing/jaeger/thrift-gen/sampling
+# github.com/jstemmer/go-junit-report v0.9.1
+## explicit
+github.com/jstemmer/go-junit-report
+github.com/jstemmer/go-junit-report/formatter
+github.com/jstemmer/go-junit-report/parser
 # github.com/jtolds/gls v4.20.0+incompatible
 github.com/jtolds/gls
 # github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515
 github.com/kr/logfmt
-# github.com/mailru/easyjson v0.0.0-20180730094502-03f2033d19d5
+# github.com/mailru/easyjson v0.7.0
 github.com/mailru/easyjson
+github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
-github.com/mailru/easyjson/buffer
-# github.com/opentracing/opentracing-go v0.0.0-20180606204148-bd9c31933947
-github.com/opentracing/opentracing-go/ext
+# github.com/opentracing/opentracing-go v1.1.0
 github.com/opentracing/opentracing-go
+github.com/opentracing/opentracing-go/ext
 github.com/opentracing/opentracing-go/log
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/samuel/go-zookeeper v0.0.0-20171027001500-9a96098268ef
+# github.com/samuel/go-zookeeper v0.0.0-20190810000440-0ceca61e4d75
 github.com/samuel/go-zookeeper/zk
-# github.com/signalfx/com_signalfx_metrics_protobuf v0.0.0-20170330202426-93e507b42f43
+# github.com/signalfx/com_signalfx_metrics_protobuf v0.0.0-20190530013331-054be550cb49
+## explicit
 github.com/signalfx/com_signalfx_metrics_protobuf
-# github.com/signalfx/gateway v1.2.8
-github.com/signalfx/gateway/protocol/collectd
-github.com/signalfx/gateway/protocol/signalfx
-github.com/signalfx/gateway/protocol/zipper
-github.com/signalfx/gateway/protocol
-github.com/signalfx/gateway/protocol/collectd/format
-github.com/signalfx/gateway/logkey
-github.com/signalfx/gateway/protocol/filtering
-github.com/signalfx/gateway/protocol/signalfx/additionalspantags
-github.com/signalfx/gateway/protocol/signalfx/format
-github.com/signalfx/gateway/protocol/signalfx/processdebug
-github.com/signalfx/gateway/protocol/signalfx/spanobfuscation
-github.com/signalfx/gateway/protocol/signalfx/tagreplace
-github.com/signalfx/gateway/sampling
-github.com/signalfx/gateway/etcdIntf
+# github.com/signalfx/gobuild v0.0.0-20171013201037-4abf7c615b64
+## explicit
+github.com/signalfx/gobuild
+github.com/signalfx/gobuild/internal/github.com/BurntSushi/toml
+github.com/signalfx/gobuild/internal/golang.org/x/net/context
+github.com/signalfx/gobuild/internal/golang.org/x/tools/cover
 # github.com/signalfx/gohistogram v0.0.0-20160107210732-1ccfd2ff5083
 github.com/signalfx/gohistogram
-# github.com/signalfx/golib v2.4.0+incompatible
-github.com/signalfx/golib/clientcfg
-github.com/signalfx/golib/datapoint
-github.com/signalfx/golib/datapoint/dpsink
-github.com/signalfx/golib/distconf
-github.com/signalfx/golib/log
-github.com/signalfx/golib/logkey
-github.com/signalfx/golib/reportsha
-github.com/signalfx/golib/sfxclient
-github.com/signalfx/golib/timekeeper
-github.com/signalfx/golib/trace
-github.com/signalfx/golib/web
-github.com/signalfx/golib/explorable
-github.com/signalfx/golib/expvar2
-github.com/signalfx/golib/errors
-github.com/signalfx/golib/event
-github.com/signalfx/golib/pointer
-github.com/signalfx/golib/sfxclient/spanfilter
-github.com/signalfx/golib/eventcounter
-github.com/signalfx/golib/trace/format
-github.com/signalfx/golib/timekeeper/timekeepertest
-# github.com/smartystreets/assertions v1.0.0
+# github.com/signalfx/golib/v3 v3.2.1
+## explicit
+github.com/signalfx/golib/v3/clientcfg
+github.com/signalfx/golib/v3/datapoint
+github.com/signalfx/golib/v3/datapoint/dpsink
+github.com/signalfx/golib/v3/distconf
+github.com/signalfx/golib/v3/errors
+github.com/signalfx/golib/v3/event
+github.com/signalfx/golib/v3/eventcounter
+github.com/signalfx/golib/v3/explorable
+github.com/signalfx/golib/v3/expvar2
+github.com/signalfx/golib/v3/log
+github.com/signalfx/golib/v3/logkey
+github.com/signalfx/golib/v3/pointer
+github.com/signalfx/golib/v3/reportsha
+github.com/signalfx/golib/v3/sfxclient
+github.com/signalfx/golib/v3/sfxclient/spanfilter
+github.com/signalfx/golib/v3/timekeeper
+github.com/signalfx/golib/v3/timekeeper/timekeepertest
+github.com/signalfx/golib/v3/trace
+github.com/signalfx/golib/v3/trace/format
+github.com/signalfx/golib/v3/trace/translator
+github.com/signalfx/golib/v3/web
+# github.com/signalfx/ingest-protocols v0.0.3
+## explicit
+github.com/signalfx/ingest-protocols/config/globbing
+github.com/signalfx/ingest-protocols/etcdIntf
+github.com/signalfx/ingest-protocols/logkey
+github.com/signalfx/ingest-protocols/protocol
+github.com/signalfx/ingest-protocols/protocol/collectd
+github.com/signalfx/ingest-protocols/protocol/collectd/format
+github.com/signalfx/ingest-protocols/protocol/filtering
+github.com/signalfx/ingest-protocols/protocol/signalfx
+github.com/signalfx/ingest-protocols/protocol/signalfx/additionalspantags
+github.com/signalfx/ingest-protocols/protocol/signalfx/format
+github.com/signalfx/ingest-protocols/protocol/signalfx/processdebug
+github.com/signalfx/ingest-protocols/protocol/signalfx/spanobfuscation
+github.com/signalfx/ingest-protocols/protocol/signalfx/tagreplace
+github.com/signalfx/ingest-protocols/protocol/zipper
+github.com/signalfx/ingest-protocols/sampling
+# github.com/signalfx/sapm-proto v0.4.0
+github.com/signalfx/sapm-proto/gen
+# github.com/smartystreets/assertions v1.0.1
 github.com/smartystreets/assertions
 github.com/smartystreets/assertions/internal/go-diff/diffmatchpatch
 github.com/smartystreets/assertions/internal/go-render/render
 github.com/smartystreets/assertions/internal/oglematchers
-# github.com/smartystreets/goconvey v0.0.0-20190330032615-68dc04aab96a
+# github.com/smartystreets/goconvey v1.6.4
+## explicit
 github.com/smartystreets/goconvey/convey
-github.com/smartystreets/goconvey/convey/reporting
 github.com/smartystreets/goconvey/convey/gotest
-# github.com/stretchr/testify v1.3.0
+github.com/smartystreets/goconvey/convey/reporting
+# github.com/stretchr/objx v0.2.0
+## explicit
+# github.com/stretchr/testify v1.4.0
+## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/uber-go/atomic v1.3.2
-github.com/uber-go/atomic
-# github.com/uber/tchannel-go v1.11.0
-github.com/uber/tchannel-go/thrift
+# github.com/uber/tchannel-go v1.16.0
 github.com/uber/tchannel-go
 github.com/uber/tchannel-go/internal/argreader
-github.com/uber/tchannel-go/thrift/gen-go/meta
-github.com/uber/tchannel-go/typed
 github.com/uber/tchannel-go/relay
+github.com/uber/tchannel-go/thrift
+github.com/uber/tchannel-go/thrift/arg2
+github.com/uber/tchannel-go/thrift/gen-go/meta
 github.com/uber/tchannel-go/tnet
 github.com/uber/tchannel-go/tos
 github.com/uber/tchannel-go/trand
+github.com/uber/tchannel-go/typed
 # github.com/vaughan0/go-ini v0.0.0-20130923145212-a98ad7ee00ec
 github.com/vaughan0/go-ini
-# golang.org/x/net v0.0.0-20190311183353-d8887717615a
-golang.org/x/net/context
-golang.org/x/net/ipv4
-golang.org/x/net/ipv6
+# go.uber.org/atomic v1.3.2
+go.uber.org/atomic
+# go.uber.org/multierr v1.1.0
+go.uber.org/multierr
+# go.uber.org/zap v1.9.1
+go.uber.org/zap
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
+# golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+## explicit
+# golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
+## explicit
 golang.org/x/net/bpf
-golang.org/x/net/internal/iana
-golang.org/x/net/internal/socket
-golang.org/x/net/trace
-golang.org/x/net/internal/timeseries
+golang.org/x/net/context
+golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
-golang.org/x/net/http/httpguts
 golang.org/x/net/idna
-# golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+golang.org/x/net/internal/iana
+golang.org/x/net/internal/socket
+golang.org/x/net/internal/timeseries
+golang.org/x/net/ipv4
+golang.org/x/net/ipv6
+golang.org/x/net/trace
+# golang.org/x/sys v0.0.0-20190502145724-3ef323f4f1fd
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.0
+golang.org/x/sys/windows
+# golang.org/x/text v0.3.2
 golang.org/x/text/secure/bidirule
+golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-golang.org/x/text/transform
-# google.golang.org/genproto v0.0.0-20180817151627-c66870c02cf8
+# google.golang.org/genproto v0.0.0-20190425155659-357c62f0e4bb
+google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.21.1
+# google.golang.org/grpc v1.20.1
 google.golang.org/grpc
-google.golang.org/grpc/codes
-google.golang.org/grpc/credentials
-google.golang.org/grpc/grpclog
-google.golang.org/grpc/health/grpc_health_v1
-google.golang.org/grpc/keepalive
-google.golang.org/grpc/metadata
-google.golang.org/grpc/status
 google.golang.org/grpc/balancer
+google.golang.org/grpc/balancer/base
 google.golang.org/grpc/balancer/roundrobin
+google.golang.org/grpc/binarylog/grpc_binarylog_v1
+google.golang.org/grpc/codes
 google.golang.org/grpc/connectivity
+google.golang.org/grpc/credentials
+google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
+google.golang.org/grpc/grpclog
 google.golang.org/grpc/internal
 google.golang.org/grpc/internal/backoff
 google.golang.org/grpc/internal/balancerload
@@ -167,17 +231,22 @@ google.golang.org/grpc/internal/channelz
 google.golang.org/grpc/internal/envconfig
 google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/grpcsync
+google.golang.org/grpc/internal/syscall
 google.golang.org/grpc/internal/transport
+google.golang.org/grpc/keepalive
+google.golang.org/grpc/metadata
 google.golang.org/grpc/naming
 google.golang.org/grpc/peer
 google.golang.org/grpc/resolver
 google.golang.org/grpc/resolver/dns
 google.golang.org/grpc/resolver/passthrough
 google.golang.org/grpc/stats
+google.golang.org/grpc/status
 google.golang.org/grpc/tap
-google.golang.org/grpc/credentials/internal
-google.golang.org/grpc/balancer/base
-google.golang.org/grpc/binarylog/grpc_binarylog_v1
-google.golang.org/grpc/internal/syscall
 # gopkg.in/natefinch/lumberjack.v2 v2.0.0-20170531160350-a96e63847dc3
+## explicit
 gopkg.in/natefinch/lumberjack.v2
+# gopkg.in/yaml.v2 v2.2.8
+## explicit
+gopkg.in/yaml.v2
+# git.apache.org/thrift.git => github.com/signalfx/thrift v0.0.0-20181211001559-3838fa316492
