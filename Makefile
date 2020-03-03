@@ -1,4 +1,4 @@
-GO_VERSION = 1.12
+GO_VERSION = 1.14
 GOLANGCI_LINT_VERSION=1.23.7
 
 # set goos by detecting environment

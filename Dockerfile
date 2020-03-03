@@ -1,4 +1,4 @@
-ARG GO_VERSION=1.12
+ARG GO_VERSION=1.14
 
 # download build tools
 FROM golang:${GO_VERSION} AS build-tools
