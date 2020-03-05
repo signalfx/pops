@@ -86,15 +86,17 @@ func (c *popsConfig) Load(conf *distconf.Distconf) {
 }
 
 type dataSinkConfig struct {
-	DatapointEndpoint  *distconf.Str
-	EventEndpoint      *distconf.Str
-	TraceEndpoint      *distconf.Str
-	ShutdownTimeout    *distconf.Duration
-	NumDrainingThreads *distconf.Int
-	NumChannels        *distconf.Int
-	BufferSize         *distconf.Int
-	BatchSize          *distconf.Int
-	MaxRetry           *distconf.Int
+	DatapointEndpoint   *distconf.Str
+	EventEndpoint       *distconf.Str
+	TraceEndpoint       *distconf.Str
+	ShutdownTimeout     *distconf.Duration
+	NumDrainingThreads  *distconf.Int
+	NumChannels         *distconf.Int
+	BufferSize          *distconf.Int
+	BatchSize           *distconf.Int
+	MaxRetry            *distconf.Int
+	MaxIdleConns        *distconf.Int
+	MaxIdleConnsPerHost *distconf.Int
 }
 
 // Load the dataSink config values from distconf
@@ -108,6 +110,8 @@ func (c *dataSinkConfig) Load(conf *distconf.Distconf) {
 	c.BufferSize = conf.Int("CHANNEL_SIZE", 1000000)
 	c.BatchSize = conf.Int("MAX_DRAIN_SIZE", 5000)
 	c.MaxRetry = conf.Int("MAX_RETRY", 1)
+	c.MaxIdleConns = conf.Int("MAX_IDLE_CONNS", 100)
+	c.MaxIdleConnsPerHost = conf.Int("MAX_IDLE_CONNS_PER_HOST", 2)
 }
 
 // clientConfig is a wrapper for clientcfg.ClientConfig.  It has an alternate Load function
@@ -445,24 +449,11 @@ func (m *Server) setupHealthCheck(r *mux.Router) {
 	r.Path("/healthz").Handler(handler)
 }
 
-func makeHTTPClientFunc(numChannels, numDrainingThreads int64) func() *http.Client {
-	maxConnections := int(numChannels * numDrainingThreads)
+func (m *Server) makeHTTPClientFunc() func() *http.Client {
 	// Create a new transport with the defaults and update idle connection settings
-	// Once POPS is upgraded to use go 1.13 we can use DefaultTransport.Clone and just overrirde
-	// maxIdleConns and MaxIdleConnsPerHost
-	transport := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-			DualStack: true,
-		}).DialContext,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		MaxIdleConns:          maxConnections,
-		MaxIdleConnsPerHost:   maxConnections,
-	}
+	transport := http.DefaultTransport.(*http.Transport)
+	transport.MaxIdleConns = int(m.configs.dataSinkConfig.MaxIdleConns.Get())
+	transport.MaxIdleConnsPerHost = int(m.configs.dataSinkConfig.MaxIdleConnsPerHost.Get())
 	return func() *http.Client {
 		return &http.Client{
 			Timeout:   sfxclient.DefaultTimeout,
@@ -499,7 +490,7 @@ func (m *Server) setupDataSink() (err error) {
 		eventEndpoint,
 		traceEndpoint,
 		"",
-		makeHTTPClientFunc(numChannels, numDrainingThreads),
+		m.makeHTTPClientFunc(),
 		m.defaultDataSinkErrorHandler,
 		maxRetry,
 	)
