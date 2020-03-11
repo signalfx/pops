@@ -451,7 +451,7 @@ func (m *Server) setupHealthCheck(r *mux.Router) {
 
 func (m *Server) makeHTTPClientFunc() func() *http.Client {
 	// Create a new transport with the defaults and update idle connection settings
-	transport := http.DefaultTransport.(*http.Transport)
+	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.MaxIdleConns = int(m.configs.dataSinkConfig.MaxIdleConns.Get())
 	transport.MaxIdleConnsPerHost = int(m.configs.dataSinkConfig.MaxIdleConnsPerHost.Get())
 	return func() *http.Client {
