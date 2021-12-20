@@ -1,3 +1,5 @@
+>ℹ️&nbsp;&nbsp;SignalFx was acquired by Splunk in October 2019. See [Splunk SignalFx](https://www.splunk.com/en_us/investor-relations/acquisitions/signalfx.html) for more information.
+
 # SignalFx Point Of Presence Service (POPS) [![CircleCI](https://circleci.com/gh/signalfx/pops/tree/master.svg?style=svg)](https://circleci.com/gh/signalfx/pops/tree/master)
 A service for forwarding metrics to SignalFx that are associated with different access tokens.
 
